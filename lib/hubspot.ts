@@ -38,9 +38,20 @@ function is401(err: unknown): boolean {
 }
 
 /**
- * Runs `fn` with a ready-to-use HubSpot client.
+ * For Server Components — read-only, no cookie writes.
+ * If the token is missing or expired, throws "Not authenticated".
+ * Callers should catch and redirect to /login.
+ */
+export async function getHubspotClient(): Promise<Client> {
+  const session = await getSession();
+  if (!session.accessToken) throw new Error("Not authenticated");
+  if (Date.now() > session.expiresAt) throw new Error("Not authenticated");
+  return new Client({ accessToken: session.accessToken });
+}
+
+/**
+ * For Route Handlers — full refresh + save on 401.
  * Proactively refreshes if the token expires within 60 s.
- * On a 401, refreshes and retries once.
  * Throws "Not authenticated" if there is no session at all.
  */
 export async function withHubspot<T>(fn: (client: Client) => Promise<T>): Promise<T> {

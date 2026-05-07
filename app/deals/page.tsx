@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { FilterOperatorEnum } from "@hubspot/api-client/lib/codegen/crm/deals/models/Filter";
-import { withHubspot } from "@/lib/hubspot";
+import { getHubspotClient } from "@/lib/hubspot";
 
 type Deal = {
   id: string;
@@ -14,25 +14,24 @@ type Deal = {
 };
 
 async function getOpenDeals(): Promise<Deal[]> {
-  const res = await withHubspot((client) =>
-    client.crm.deals.searchApi.doSearch({
-      filterGroups: [
-        {
-          filters: [
-            {
-              propertyName: "dealstage",
-              operator: FilterOperatorEnum.NotIn,
-              values: ["closedwon", "closedlost"],
-            },
-          ],
-        },
-      ],
-      properties: ["dealname", "dealstage", "amount", "closedate"],
-      sorts: ["-hs_lastmodifieddate"],
-      limit: 100,
-      after: "0",
-    })
-  );
+  const client = await getHubspotClient();
+  const res = await client.crm.deals.searchApi.doSearch({
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: "dealstage",
+            operator: FilterOperatorEnum.NotIn,
+            values: ["closedwon", "closedlost"],
+          },
+        ],
+      },
+    ],
+    properties: ["dealname", "dealstage", "amount", "closedate"],
+    sorts: ["-hs_lastmodifieddate"],
+    limit: 100,
+    after: "0",
+  });
   return (res.results ?? []) as Deal[];
 }
 

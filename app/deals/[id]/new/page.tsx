@@ -1,12 +1,11 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { withHubspot } from "@/lib/hubspot";
+import { getHubspotClient } from "@/lib/hubspot";
 import TaskDraftForm from "./TaskDraftForm";
 
 async function getDealName(dealId: string): Promise<string> {
-  const deal = await withHubspot((client) =>
-    client.crm.deals.basicApi.getById(dealId, ["dealname"])
-  );
+  const client = await getHubspotClient();
+  const deal = await client.crm.deals.basicApi.getById(dealId, ["dealname"]);
   return deal.properties["dealname"] ?? "this deal";
 }
 
@@ -37,7 +36,7 @@ export default async function NewTaskPage({
       </Link>
       <h1 className="text-xl font-bold mb-1 leading-snug">{dealName}</h1>
       <p className="text-gray-500 text-sm mb-6">
-        Describe your visit and Claude will draft the task.
+        Describe your visit to generate the task.
       </p>
 
       <TaskDraftForm dealId={id} dealName={dealName} />
