@@ -69,7 +69,7 @@ export default function TaskDraftForm({
       });
       if (!res.ok) throw new Error("Task creation failed");
       const data = await res.json();
-      router.push(`/deals/${dealId}/done?taskId=${data.taskId}`);
+      router.push(`/deals/${dealId}/done?taskId=${data.taskId}&taskUrl=${encodeURIComponent(data.taskUrl)}`);
     } catch {
       setError("Couldn't save the task. Try again.");
     } finally {
