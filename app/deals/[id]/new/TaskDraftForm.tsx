@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Owner } from "./page";
 
 type Priority = "LOW" | "MEDIUM" | "HIGH";
 
@@ -15,9 +16,11 @@ type TaskFields = {
 export default function TaskDraftForm({
   dealId,
   dealName,
+  owners,
 }: {
   dealId: string;
   dealName: string;
+  owners: Owner[];
 }) {
   const router = useRouter();
   const [note, setNote] = useState("");
@@ -29,11 +32,13 @@ export default function TaskDraftForm({
   });
   const [suggesting, setSuggesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [suggested, setSuggested] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSuggest() {
     if (!note.trim()) return;
     setSuggesting(true);
+    setSuggested(false);
     setError(null);
     try {
       const res = await fetch("/api/suggest", {
@@ -41,6 +46,7 @@ export default function TaskDraftForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ note, dealId }),
       });
+      if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Suggestion failed");
       const data = await res.json();
       setFields({
@@ -49,8 +55,9 @@ export default function TaskDraftForm({
         priority: data.priority ?? "",
         owner_id: data.owner_id ?? "",
       });
+      setSuggested(true);
     } catch {
-      setError("Couldn't generate suggestion. Try again.");
+      setError("Couldn't generate suggestion. Check your connection and try again.");
     } finally {
       setSuggesting(false);
     }
@@ -67,94 +74,147 @@ export default function TaskDraftForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...fields, dealId }),
       });
+      if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Task creation failed");
       const data = await res.json();
       router.push(`/deals/${dealId}/done?taskId=${data.taskId}&taskUrl=${encodeURIComponent(data.taskUrl)}`);
     } catch {
-      setError("Couldn't save the task. Try again.");
+      setError("Couldn't save the task. Check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
   }
 
+  const inputClass =
+    "w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition disabled:opacity-50";
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          What happened?
-        </label>
+
+      {/* Note textarea */}
+      <div className="flex flex-col gap-3">
         <textarea
-          className="w-full rounded-xl border border-gray-300 p-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-          rows={4}
-          placeholder={`Summarise your visit with ${dealName}…`}
+          className="w-full rounded-2xl border border-gray-200 bg-white p-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition disabled:opacity-50"
+          rows={5}
+          placeholder={`What happened with ${dealName}?`}
           value={note}
+          disabled={submitting}
           onChange={(e) => setNote(e.target.value)}
         />
         <button
           type="button"
           onClick={handleSuggest}
-          disabled={!note.trim() || suggesting}
-          className="mt-2 w-full rounded-xl bg-blue-600 py-3 text-white font-semibold text-base disabled:opacity-40 active:bg-blue-700"
+          disabled={!note.trim() || suggesting || submitting}
+          className="w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 py-3.5 text-white font-semibold text-base shadow-md disabled:opacity-40 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-          {suggesting ? "Thinking…" : "✦ Suggest task"}
+          {suggesting ? (
+            <>
+              <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              Thinking…
+            </>
+          ) : (
+            <>✦ Suggest task</>
+          )}
         </button>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 flex flex-col gap-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">
-            Task title
-          </label>
-          <input
-            type="text"
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g. Send follow-up quote"
-            value={fields.title}
-            onChange={(e) => setFields((f) => ({ ...f, title: e.target.value }))}
-          />
-        </div>
+      {/* Fields card */}
+      <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+        {suggested && (
+          <div className="bg-indigo-50 border-b border-indigo-100 px-4 py-2 flex items-center gap-2">
+            <span className="text-indigo-400 text-xs">✦</span>
+            <span className="text-xs font-medium text-indigo-600">
+              Review and edit before saving
+            </span>
+          </div>
+        )}
+        <div className="p-4 flex flex-col gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+              Task title
+            </label>
+            <input
+              type="text"
+              className={inputClass}
+              placeholder="e.g. Send follow-up quote"
+              value={fields.title}
+              disabled={submitting}
+              onChange={(e) => setFields((f) => ({ ...f, title: e.target.value }))}
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">
-            Due date
-          </label>
-          <input
-            type="date"
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={fields.due_date}
-            onChange={(e) => setFields((f) => ({ ...f, due_date: e.target.value }))}
-          />
-        </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+              Due date
+            </label>
+            <input
+              type="date"
+              className={inputClass}
+              value={fields.due_date}
+              disabled={submitting}
+              onChange={(e) => setFields((f) => ({ ...f, due_date: e.target.value }))}
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">
-            Priority
-          </label>
-          <select
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={fields.priority}
-            onChange={(e) =>
-              setFields((f) => ({ ...f, priority: e.target.value as Priority | "" }))
-            }
-          >
-            <option value="">Select…</option>
-            <option value="LOW">Low</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HIGH">High</option>
-          </select>
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+              Priority
+            </label>
+            <select
+              className={inputClass}
+              value={fields.priority}
+              disabled={submitting}
+              onChange={(e) =>
+                setFields((f) => ({ ...f, priority: e.target.value as Priority | "" }))
+              }
+            >
+              <option value="">Select…</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+            </select>
+          </div>
+
+          {owners.length > 0 && (
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
+                Owner
+              </label>
+              <select
+                className={inputClass}
+                value={fields.owner_id}
+                disabled={submitting}
+                onChange={(e) => setFields((f) => ({ ...f, owner_id: e.target.value }))}
+              >
+                <option value="">Unassigned</option>
+                {owners.map((o) => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 text-center">{error}</p>
+        <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
       )}
 
       <button
         type="submit"
-        disabled={!fields.title.trim() || submitting}
-        className="w-full rounded-xl bg-green-600 py-3 text-white font-semibold text-base disabled:opacity-40 active:bg-green-700"
+        disabled={!fields.title.trim() || submitting || suggesting}
+        className="w-full rounded-2xl bg-gray-900 py-4 text-white font-semibold text-base shadow-md disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
       >
-        {submitting ? "Saving…" : "Save task to HubSpot"}
+        {submitting ? (
+          <>
+            <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            Saving…
+          </>
+        ) : (
+          "Save task to HubSpot"
+        )}
       </button>
     </form>
   );

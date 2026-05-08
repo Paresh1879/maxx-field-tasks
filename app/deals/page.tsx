@@ -53,14 +53,6 @@ function formatDate(dateStr?: string) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-function stageLabel(stage?: string) {
-  if (!stage) return "Unknown";
-  return stage
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 export default async function DealsPage() {
   let deals: Deal[] = [];
 
@@ -76,8 +68,8 @@ export default async function DealsPage() {
 
   return (
     <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
-      <h1 className="text-2xl font-bold mb-1">Open Deals</h1>
-      <p className="text-gray-500 text-sm mb-6">
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">Open Deals</h1>
+      <p className="text-gray-400 text-sm mb-6">
         Tap a deal to log a task after your visit.
       </p>
 
@@ -89,29 +81,43 @@ export default async function DealsPage() {
             const name = deal.properties.dealname ?? "Unnamed Deal";
             const amount = formatCurrency(deal.properties.amount);
             const closeDate = formatDate(deal.properties.closedate);
-            const stage = stageLabel(deal.properties.dealstage);
 
             return (
               <li key={deal.id}>
                 <Link
                   href={`/deals/${deal.id}/new`}
-                  className="block rounded-xl border border-gray-200 bg-white p-4 shadow-sm active:bg-gray-50"
+                  className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-4 py-4 shadow-sm active:bg-gray-50 transition"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="font-semibold text-base leading-snug">
-                      {name}
-                    </span>
-                    <span className="shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-                      {stage}
+                  {/* Avatar */}
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <span className="text-indigo-600 font-bold text-sm">
+                      {name.charAt(0).toUpperCase()}
                     </span>
                   </div>
 
-                  {(amount || closeDate) && (
-                    <div className="mt-2 flex gap-4 text-sm text-gray-500">
-                      {amount && <span>{amount}</span>}
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-base leading-snug truncate">
+                      {name}
+                    </p>
+                    <div className="flex gap-3 mt-0.5 text-sm text-gray-400">
+                      {amount && (
+                        <span className="font-medium text-emerald-600">{amount}</span>
+                      )}
                       {closeDate && <span>Closes {closeDate}</span>}
                     </div>
-                  )}
+                  </div>
+
+                  {/* Chevron */}
+                  <svg
+                    className="shrink-0 text-gray-300 w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </li>
             );
