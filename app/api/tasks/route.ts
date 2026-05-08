@@ -1,6 +1,4 @@
 import { getSession } from "@/lib/session";
-import { withHubspot } from "@/lib/hubspot";
-import { AssociationSpecAssociationCategoryEnum } from "@hubspot/api-client/lib/codegen/crm/objects/tasks/models/AssociationSpec";
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -17,41 +15,52 @@ export async function POST(request: Request) {
     );
   }
 
-  // Convert ISO date (YYYY-MM-DD) to millisecond timestamp HubSpot expects
   const dueTimestamp = due_date
-    ? new Date(due_date).getTime().toString()
-    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).getTime().toString();
+    ? new Date(due_date).getTime()
+    : Date.now() + 7 * 24 * 60 * 60 * 1000;
 
-  const properties: Record<string, string> = {
-    hs_task_subject: title,
-    hs_task_type: "TODO",
-    hs_task_priority: priority ?? "MEDIUM",
-    hs_timestamp: dueTimestamp,
+  const body: Record<string, unknown> = {
+    engagement: {
+      active: true,
+      type: "TASK",
+      timestamp: dueTimestamp,
+    },
+    associations: {
+      dealIds: [Number(dealId)],
+    },
+    metadata: {
+      subject: title,
+      status: "NOT_STARTED",
+      priority: priority ?? "MEDIUM",
+      taskType: "TODO",
+    },
   };
 
   if (owner_id) {
-    properties["hubspot_owner_id"] = owner_id;
+    (body.engagement as Record<string, unknown>).ownerId = Number(owner_id);
   }
 
-  const task = await withHubspot((client) =>
-    client.crm.objects.tasks.basicApi.create({
-      properties,
-      associations: [
-        {
-          to: { id: dealId },
-          types: [
-            {
-              associationCategory:
-                AssociationSpecAssociationCategoryEnum.HubspotDefined,
-              associationTypeId: 216,
-            },
-          ],
-        },
-      ],
-    })
-  );
+  const res = await fetch("https://api.hubapi.com/engagements/v1/engagements", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.HUBSPOT_SERVICE_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
 
-  const taskUrl = `https://app.hubspot.com/contacts/${task.id}`;
+  if (!res.ok) {
+    const err = await res.json();
+    console.error("HubSpot engagement error:", err);
+    return Response.json({ error: "Failed to create task" }, { status: 502 });
+  }
 
-  return Response.json({ taskId: task.id, taskUrl });
+  const data = await res.json();
+  const taskId = data.engagement?.id?.toString() ?? "";
+  const portalId = data.engagement?.portalId;
+  const taskUrl = portalId
+    ? `https://app.hubspot.com/tasks/${portalId}?engagementId=${taskId}`
+    : `https://app.hubspot.com/tasks`;
+
+  return Response.json({ taskId, taskUrl });
 }
