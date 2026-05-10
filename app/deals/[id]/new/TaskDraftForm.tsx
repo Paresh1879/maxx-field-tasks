@@ -17,10 +17,12 @@ export default function TaskDraftForm({
   dealId,
   dealName,
   owners,
+  currentOwnerId,
 }: {
   dealId: string;
   dealName: string;
   owners: Owner[];
+  currentOwnerId: string;
 }) {
   const router = useRouter();
   const [note, setNote] = useState("");
@@ -28,7 +30,7 @@ export default function TaskDraftForm({
     title: "",
     due_date: "",
     priority: "",
-    owner_id: "",
+    owner_id: currentOwnerId,
   });
   const [suggesting, setSuggesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);

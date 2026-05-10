@@ -1,16 +1,24 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getHubspotClient } from "@/lib/hubspot";
+import { getSession } from "@/lib/session";
 import TaskDraftForm from "./TaskDraftForm";
 
 export type Owner = { id: string; name: string };
 
-async function getPageData(dealId: string): Promise<{ dealName: string; owners: Owner[] }> {
-  const client = await getHubspotClient();
+async function getPageData(dealId: string): Promise<{
+  dealName: string;
+  owners: Owner[];
+  currentOwnerId: string;
+}> {
+  const [client, session] = await Promise.all([getHubspotClient(), getSession()]);
 
-  const [deal, ownersRes] = await Promise.all([
+  const [deal, ownersRes, tokenInfo] = await Promise.all([
     client.crm.deals.basicApi.getById(dealId, ["dealname"]),
     client.crm.owners.ownersApi.getPage(undefined, undefined, 100),
+    fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${session.accessToken}`).then(
+      (r) => r.json() as Promise<{ user_id: number }>
+    ),
   ]);
 
   const dealName = deal.properties["dealname"] ?? "this deal";
@@ -19,7 +27,12 @@ async function getPageData(dealId: string): Promise<{ dealName: string; owners: 
     name: [o.firstName, o.lastName].filter(Boolean).join(" ") || o.email || String(o.id),
   }));
 
-  return { dealName, owners };
+  const currentOwner = (ownersRes.results ?? []).find(
+    (o) => o.userId === tokenInfo.user_id
+  );
+  const currentOwnerId = currentOwner ? String(currentOwner.id) : "";
+
+  return { dealName, owners, currentOwnerId };
 }
 
 export default async function NewTaskPage({
@@ -31,9 +44,10 @@ export default async function NewTaskPage({
 
   let dealName = "this deal";
   let owners: Owner[] = [];
+  let currentOwnerId = "";
 
   try {
-    ({ dealName, owners } = await getPageData(id));
+    ({ dealName, owners, currentOwnerId } = await getPageData(id));
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "";
     if (msg === "Not authenticated" || msg.includes("refresh failed")) {
@@ -51,7 +65,7 @@ export default async function NewTaskPage({
         Describe your visit to generate the task.
       </p>
 
-      <TaskDraftForm dealId={id} dealName={dealName} owners={owners} />
+      <TaskDraftForm dealId={id} dealName={dealName} owners={owners} currentOwnerId={currentOwnerId} />
     </main>
   );
 }
