@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   const taskId = data.engagement?.id?.toString() ?? "";
   const portalId = data.engagement?.portalId;
   const taskUrl = portalId
-    ? `https://app.hubspot.com/tasks/${portalId}?engagementId=${taskId}`
+    ? `https://app.hubspot.com/contacts/${portalId}/record/0-3/${dealId}?taskId=${taskId}`
     : `https://app.hubspot.com/tasks`;
 
   return Response.json({ taskId, taskUrl });
