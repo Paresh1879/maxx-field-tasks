@@ -4,7 +4,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm text-center space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">Maxx Field Tasks</h1>
         <p className="text-gray-500 text-sm">
-          Log meeting notes and create HubSpot tasks from your phone.
+          Turn field meeting notes into HubSpot tasks.
         </p>
         <a
           href="/api/auth/login"
