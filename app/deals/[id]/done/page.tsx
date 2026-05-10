@@ -31,7 +31,7 @@ export default async function DonePage({
             href={hubspotLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full rounded-xl bg-orange-500 py-3 text-white font-semibold text-base text-center active:bg-orange-600"
+            className="w-full rounded-xl bg-orange-500 py-3 text-white font-semibold text-base text-center active:bg-orange-600 transition-colors"
           >
             View task in HubSpot →
           </a>
@@ -39,14 +39,14 @@ export default async function DonePage({
 
         <Link
           href={`/deals/${id}/new`}
-          className="w-full rounded-xl border border-gray-300 py-3 text-gray-700 font-semibold text-base text-center active:bg-gray-50"
+          className="w-full rounded-xl border border-gray-300 py-3 text-gray-700 font-semibold text-base text-center active:bg-gray-50 transition-colors"
         >
           Log another task
         </Link>
 
         <Link
           href="/deals"
-          className="w-full rounded-xl border border-gray-200 py-3 text-gray-500 text-base text-center active:bg-gray-50"
+          className="w-full rounded-xl border border-gray-200 py-3 text-gray-500 text-base text-center active:bg-gray-50 transition-colors"
         >
           ← Back to deals
         </Link>
