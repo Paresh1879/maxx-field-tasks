@@ -7,6 +7,7 @@ type Deal = {
   id: string;
   properties: {
     dealname?: string;
+    dealstage?: string;
     amount?: string;
     closedate?: string;
   };
