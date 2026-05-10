@@ -45,7 +45,7 @@ function is401(err: unknown): boolean {
 export async function getHubspotClient(): Promise<Client> {
   const session = await getSession();
   if (!session.accessToken) throw new Error("Not authenticated");
-  if (Date.now() > session.expiresAt) throw new Error("Not authenticated");
+  if (Date.now() > session.expiresAt - 60_000) throw new Error("Not authenticated");
   return new Client({ accessToken: session.accessToken });
 }
 
