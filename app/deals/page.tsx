@@ -15,28 +15,42 @@ type Deal = {
 
 async function getOpenDeals(): Promise<Deal[]> {
   const client = await getHubspotClient();
-  const res = await client.crm.deals.searchApi.doSearch({
-    filterGroups: [
-      {
-        filters: [
-          {
-            propertyName: "dealstage",
-            operator: FilterOperatorEnum.NotIn,
-            values: ["closedwon", "closedlost"],
-          },
-        ],
-      },
-    ],
-    properties: ["dealname", "dealstage", "amount", "closedate"],
-    sorts: ["-hs_lastmodifieddate"],
-    limit: 100,
-    after: "0",
-  });
+
+  const [res, pipelines] = await Promise.all([
+    client.crm.deals.searchApi.doSearch({
+      filterGroups: [
+        {
+          filters: [
+            {
+              propertyName: "dealstage",
+              operator: FilterOperatorEnum.NotIn,
+              values: ["closedwon", "closedlost"],
+            },
+          ],
+        },
+      ],
+      properties: ["dealname", "dealstage", "amount", "closedate"],
+      sorts: ["-hs_lastmodifieddate"],
+      limit: 200,
+      after: "0",
+    }),
+    client.crm.pipelines.pipelinesApi.getAll("deals"),
+  ]);
+
+  const stageMap: Record<string, string> = {};
+  for (const pipeline of pipelines.results ?? []) {
+    for (const stage of pipeline.stages ?? []) {
+      stageMap[stage.id] = stage.label;
+    }
+  }
+
   return (res.results ?? []).map((d) => ({
     id: d.id,
     properties: {
       dealname: d.properties.dealname ?? undefined,
-      dealstage: d.properties.dealstage ?? undefined,
+      dealstage: d.properties.dealstage
+        ? (stageMap[d.properties.dealstage] ?? undefined)
+        : undefined,
       amount: d.properties.amount ?? undefined,
       closedate: d.properties.closedate ?? undefined,
     },
