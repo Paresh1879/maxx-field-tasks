@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   const today = new Date().toISOString().split("T")[0];
 
   const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: "claude-sonnet-4-6",
     max_tokens: 512,
     system: [
       {

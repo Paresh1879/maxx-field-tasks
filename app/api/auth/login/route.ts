@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 
 const SCOPES = [
   "crm.objects.deals.read",
-//   "crm.objects.tasks.read",
-//   "crm.objects.tasks.write",
   "crm.objects.owners.read",
   "crm.schemas.deals.read",
   "crm.objects.contacts.read",

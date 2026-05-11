@@ -51,12 +51,12 @@ export default function TaskDraftForm({
       if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Suggestion failed");
       const data = await res.json();
-      setFields({
+      setFields((f) => ({
         title: data.title ?? "",
         due_date: data.due_date ?? "",
         priority: data.priority ?? "",
-        owner_id: data.owner_id ?? "",
-      });
+        owner_id: data.owner_id ?? f.owner_id,
+      }));
       setSuggested(true);
     } catch {
       setError("Couldn't generate suggestion. Check your connection and try again.");
@@ -80,11 +80,11 @@ export default function TaskDraftForm({
       if (!res.ok) throw new Error("Task creation failed");
       const data = await res.json();
       router.push(`/deals/${dealId}/done?taskId=${data.taskId}&taskUrl=${encodeURIComponent(data.taskUrl)}`);
+      return;
     } catch {
       setError("Couldn't save the task. Check your connection and try again.");
-    } finally {
-      setSubmitting(false);
     }
+    setSubmitting(false);
   }
 
   const inputClass =

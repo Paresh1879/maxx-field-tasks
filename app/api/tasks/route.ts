@@ -6,6 +6,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  if (!process.env.HUBSPOT_SERVICE_KEY) {
+    return Response.json({ error: "HUBSPOT_SERVICE_KEY is not configured" }, { status: 500 });
+  }
+
   const { title, due_date, priority, owner_id, dealId } = await request.json();
 
   if (!title?.trim() || !dealId) {

@@ -12,11 +12,12 @@ async function getPageData(dealId: string): Promise<{
   currentOwnerId: string;
 }> {
   const [client, session] = await Promise.all([getHubspotClient(), getSession()]);
+  const accessToken = session.accessToken;
 
   const [deal, ownersRes, tokenInfo] = await Promise.all([
     client.crm.deals.basicApi.getById(dealId, ["dealname"]),
     client.crm.owners.ownersApi.getPage(undefined, undefined, 100),
-    fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${session.accessToken}`).then(
+    fetch(`https://api.hubapi.com/oauth/v1/access-tokens/${accessToken}`).then(
       (r) => r.json() as Promise<{ user_id: number }>
     ),
   ]);
