@@ -22,7 +22,7 @@ Today's date: ${today}
 - Always return a future date in YYYY-MM-DD format — never return a past date
 
 ## Priority
-- HIGH: contract expiring soon, competitor risk mentioned, rep used urgent language, or deal value > $500k
+- HIGH: contract expiring soon, competitor risk mentioned, or rep used urgent language
 - MEDIUM: clear next step with no deadline pressure — standard follow-up
 - LOW: early-stage exploration, no decision-maker involved, or purely informational
 
