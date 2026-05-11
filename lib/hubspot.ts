@@ -7,3 +7,34 @@ export async function getHubspotClient(): Promise<Client> {
   if (Date.now() > session.expiresAt - 60_000) throw new Error("Not authenticated");
   return new Client({ accessToken: session.accessToken });
 }
+
+// For use in Route Handlers only — refreshes the token if near expiry and saves the cookie.
+// Returns false if there is no session or refresh fails (caller should return 401).
+export async function refreshSessionIfNeeded(): Promise<boolean> {
+  const session = await getSession();
+  if (!session.accessToken) return false;
+  if (Date.now() <= session.expiresAt - 60_000) return true;
+
+  try {
+    const body = new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: process.env.HUBSPOT_CLIENT_ID!,
+      client_secret: process.env.HUBSPOT_CLIENT_SECRET!,
+      refresh_token: session.refreshToken,
+    });
+    const res = await fetch("https://api.hubapi.com/oauth/v1/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    session.accessToken = data.access_token;
+    session.refreshToken = data.refresh_token;
+    session.expiresAt = Date.now() + data.expires_in * 1000;
+    await session.save();
+    return true;
+  } catch {
+    return false;
+  }
+}

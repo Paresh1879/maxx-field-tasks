@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { getSession } from "@/lib/session";
+import { refreshSessionIfNeeded } from "@/lib/hubspot";
 
 const anthropic = new Anthropic();
 
@@ -32,8 +32,8 @@ Today's date: ${today}
 }
 
 export async function POST(request: Request) {
-  const session = await getSession();
-  if (!session.accessToken) {
+  const authed = await refreshSessionIfNeeded();
+  if (!authed) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 

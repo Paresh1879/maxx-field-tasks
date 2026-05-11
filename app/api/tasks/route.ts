@@ -1,8 +1,8 @@
-import { getSession } from "@/lib/session";
+import { refreshSessionIfNeeded } from "@/lib/hubspot";
 
 export async function POST(request: Request) {
-  const session = await getSession();
-  if (!session.accessToken) {
+  const authed = await refreshSessionIfNeeded();
+  if (!authed) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 

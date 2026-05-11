@@ -10,7 +10,8 @@ export default async function DonePage({
   const { id } = await params;
   const { taskId, taskUrl } = await searchParams;
 
-  const hubspotLink = taskUrl ? decodeURIComponent(taskUrl) : null;
+  const decoded = taskUrl ? decodeURIComponent(taskUrl) : null;
+  const hubspotLink = decoded?.startsWith("https://app.hubspot.com/") ? decoded : null;
 
   return (
     <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-lg mx-auto w-full text-center">
