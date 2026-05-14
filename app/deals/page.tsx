@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { FilterOperatorEnum } from "@hubspot/api-client/lib/codegen/crm/deals/models/Filter";
-import { getHubspotClient } from "@/lib/hubspot";
+import { HUBSPOT_API_BASE, getHubspotClient } from "@/lib/hubspot";
+import { getSession } from "@/lib/session";
 import DealsClient from "./DealsClient";
 
 type Deal = {
@@ -15,28 +16,43 @@ type Deal = {
 };
 
 async function getOpenDeals(): Promise<Deal[]> {
-  const client = await getHubspotClient();
+  const [client, session] = await Promise.all([getHubspotClient(), getSession()]);
 
-  const [res, pipelines] = await Promise.all([
-    client.crm.deals.searchApi.doSearch({
-      filterGroups: [
-        {
-          filters: [
-            {
-              propertyName: "dealstage",
-              operator: FilterOperatorEnum.NotIn,
-              values: ["closedwon", "closedlost"],
-            },
-          ],
-        },
-      ],
-      properties: ["dealname", "dealstage", "pipeline", "amount", "closedate"],
-      sorts: ["-hs_lastmodifieddate"],
-      limit: 200,
-      after: "0",
-    }),
+  const [tokenInfo, pipelines] = await Promise.all([
+    fetch(`${HUBSPOT_API_BASE}/oauth/v1/access-tokens/${session.accessToken}`)
+      .then((r) => r.json() as Promise<{ user_id: number }>),
     client.crm.pipelines.pipelinesApi.getAll("deals"),
   ]);
+
+  const ownersRes = await client.crm.owners.ownersApi.getPage(undefined, undefined, 100);
+  const currentOwner = (ownersRes.results ?? []).find(
+    (o) => o.userId === tokenInfo.user_id
+  );
+  const ownerId = currentOwner ? String(currentOwner.id) : null;
+
+  const filters: Parameters<typeof client.crm.deals.searchApi.doSearch>[0]["filterGroups"][0]["filters"] = [
+    {
+      propertyName: "dealstage",
+      operator: FilterOperatorEnum.NotIn,
+      values: ["closedwon", "closedlost"],
+    },
+  ];
+
+  if (ownerId) {
+    filters.push({
+      propertyName: "hubspot_owner_id",
+      operator: FilterOperatorEnum.Eq,
+      value: ownerId,
+    });
+  }
+
+  const res = await client.crm.deals.searchApi.doSearch({
+    filterGroups: [{ filters }],
+    properties: ["dealname", "dealstage", "pipeline", "amount", "closedate"],
+    sorts: ["-hs_lastmodifieddate"],
+    limit: 200,
+    after: "0",
+  });
 
   const stageMap: Record<string, string> = {};
   const pipelineMap: Record<string, string> = {};
