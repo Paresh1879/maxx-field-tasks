@@ -8,6 +8,7 @@ type Deal = {
   properties: {
     dealname?: string;
     dealstage?: string;
+    pipeline?: string;
     amount?: string;
     closedate?: string;
   };
@@ -29,7 +30,7 @@ async function getOpenDeals(): Promise<Deal[]> {
           ],
         },
       ],
-      properties: ["dealname", "dealstage", "amount", "closedate"],
+      properties: ["dealname", "dealstage", "pipeline", "amount", "closedate"],
       sorts: ["-hs_lastmodifieddate"],
       limit: 200,
       after: "0",
@@ -38,7 +39,9 @@ async function getOpenDeals(): Promise<Deal[]> {
   ]);
 
   const stageMap: Record<string, string> = {};
+  const pipelineMap: Record<string, string> = {};
   for (const pipeline of pipelines.results ?? []) {
+    pipelineMap[pipeline.id] = pipeline.label;
     for (const stage of pipeline.stages ?? []) {
       stageMap[stage.id] = stage.label;
     }
@@ -50,6 +53,9 @@ async function getOpenDeals(): Promise<Deal[]> {
       dealname: d.properties.dealname ?? undefined,
       dealstage: d.properties.dealstage
         ? (stageMap[d.properties.dealstage] ?? undefined)
+        : undefined,
+      pipeline: d.properties.pipeline
+        ? (pipelineMap[d.properties.pipeline] ?? undefined)
         : undefined,
       amount: d.properties.amount ?? undefined,
       closedate: d.properties.closedate ?? undefined,
