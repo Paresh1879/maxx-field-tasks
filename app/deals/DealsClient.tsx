@@ -165,12 +165,12 @@ function HistoryPanel({ history, onRetry }: { history: HistoryState; onRetry: ()
                       </span>
                     </div>
                     {a.subject && (
-                      <p className="text-xs font-medium text-gray-800 leading-snug truncate">
+                      <p className="text-xs font-medium text-gray-800 leading-snug">
                         {a.subject}
                       </p>
                     )}
                     {a.body && (
-                      <p className="text-xs text-gray-500 leading-snug line-clamp-2 mt-0.5">
+                      <p className="text-xs text-gray-500 leading-snug mt-0.5">
                         {a.body}
                       </p>
                     )}
@@ -205,27 +205,30 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
     setVisibleCount(PAGE_SIZE);
   }, []);
 
+  const fetchHistory = useCallback(async (dealId: string) => {
+    fetchedRef.current.add(dealId);
+    setHistoryCache((prev) => ({ ...prev, [dealId]: "loading" }));
+    try {
+      const res = await fetch(`/api/deals/${dealId}/history`);
+      if (!res.ok) throw new Error("fetch failed");
+      const data: DealHistory = await res.json();
+      setHistoryCache((prev) => ({ ...prev, [dealId]: data }));
+    } catch {
+      setHistoryCache((prev) => ({ ...prev, [dealId]: "error" }));
+    }
+  }, []);
+
   const handleExpand = useCallback(
-    async (dealId: string) => {
+    (dealId: string) => {
       if (expandedId === dealId) {
         setExpandedId(null);
         return;
       }
       setExpandedId(dealId);
       if (fetchedRef.current.has(dealId)) return;
-      fetchedRef.current.add(dealId);
-
-      setHistoryCache((prev) => ({ ...prev, [dealId]: "loading" }));
-      try {
-        const res = await fetch(`/api/deals/${dealId}/history`);
-        if (!res.ok) throw new Error("fetch failed");
-        const data: DealHistory = await res.json();
-        setHistoryCache((prev) => ({ ...prev, [dealId]: data }));
-      } catch {
-        setHistoryCache((prev) => ({ ...prev, [dealId]: "error" }));
-      }
+      fetchHistory(dealId);
     },
-    [expandedId]
+    [expandedId, fetchHistory]
   );
 
   const filtered = useMemo(() => {
@@ -378,7 +381,7 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                             history={history}
                             onRetry={() => {
                               fetchedRef.current.delete(deal.id);
-                              handleExpand(deal.id);
+                              fetchHistory(deal.id);
                             }}
                           />
                         )}

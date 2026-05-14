@@ -103,7 +103,7 @@ export async function GET(
         type: type.toLowerCase() as HistoryActivity["type"],
         timestamp: item.engagement.timestamp ?? 0,
         subject: item.metadata?.subject ?? undefined,
-        body: raw ? stripHtml(raw).slice(0, 300) || undefined : undefined,
+        body: raw ? stripHtml(raw).slice(0, 1000) || undefined : undefined,
       });
     }
   }
@@ -124,7 +124,7 @@ export async function GET(
         type: "task",
         timestamp: createdAt || dueAt,
         subject: p.hs_task_subject ?? undefined,
-        body: p.hs_task_body ? stripHtml(p.hs_task_body).slice(0, 300) || undefined : undefined,
+        body: p.hs_task_body ? stripHtml(p.hs_task_body).slice(0, 1000) || undefined : undefined,
       });
     }
   }
