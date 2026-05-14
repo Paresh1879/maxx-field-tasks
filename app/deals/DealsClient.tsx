@@ -194,7 +194,6 @@ function HistoryPanel({ history, onRetry }: { history: HistoryState; onRetry: ()
 export default function DealsClient({ deals }: { deals: Deal[] }) {
   const PAGE_SIZE = 20;
   const [search, setSearch] = useState("");
-  const [sortAsc, setSortAsc] = useState(true);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [historyCache, setHistoryCache] = useState<Record<string, HistoryState>>({});
@@ -242,21 +241,21 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
     result.sort((a, b) => {
       const da = a.properties.closedate
         ? new Date(a.properties.closedate).getTime()
-        : 0;
+        : Infinity;
       const db = b.properties.closedate
         ? new Date(b.properties.closedate).getTime()
-        : 0;
-      return sortAsc ? da - db : db - da;
+        : Infinity;
+      return da - db;
     });
 
     return result;
-  }, [deals, search, sortAsc]);
+  }, [deals, search]);
 
   return (
     <>
       {/* Controls */}
-      <div className="flex gap-2 mb-5">
-        <div className="relative flex-1">
+      <div className="mb-5">
+        <div className="relative">
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
             fill="none"
@@ -278,25 +277,6 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
             className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300"
           />
         </div>
-        <button
-          onClick={() => setSortAsc((v) => !v)}
-          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-600 bg-white shrink-0 active:bg-gray-50 transition"
-        >
-          <svg
-            className="w-4 h-4 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-            />
-          </svg>
-          {sortAsc ? "Date ↑" : "Date ↓"}
-        </button>
       </div>
 
       {/* List */}
