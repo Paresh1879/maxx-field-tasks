@@ -90,8 +90,11 @@ export default async function DealsPage() {
 
   return (
     <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
-      <div className="flex items-center justify-between mb-6">
-        <Image src="/logo.png" alt="Maxx Orthopedics" width={120} height={60} style={{ height: "auto" }} priority />
+      <div className="flex flex-col items-center mb-6">
+        <Image src="/logo.png" alt="Maxx Orthopedics" width={160} height={80} style={{ height: "auto" }} priority />
+      </div>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-2xl font-bold text-gray-900">Open Deals</h1>
         <form action="/api/auth/logout" method="POST">
           <button
             type="submit"
@@ -101,7 +104,6 @@ export default async function DealsPage() {
           </button>
         </form>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Open Deals</h1>
       <p className="text-gray-400 text-sm mb-6">
         Tap a deal to log a task after your visit.
       </p>
