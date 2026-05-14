@@ -15,7 +15,10 @@ export async function getHubspotClient(): Promise<Client> {
 export async function refreshSessionIfNeeded(): Promise<boolean> {
   const session = await getSession();
   if (!session.accessToken) return false;
-  if (Date.now() <= session.expiresAt - 60_000) return true;
+  if (Date.now() <= session.expiresAt - 60_000) {
+    await session.save(); // reset the 30-min inactivity timer on each active request
+    return true;
+  }
 
   try {
     const body = new URLSearchParams({

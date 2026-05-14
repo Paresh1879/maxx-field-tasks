@@ -13,6 +13,7 @@ const sessionOptions = {
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
+    maxAge: 60 * 30, // 30 minutes of inactivity
   },
 };
 
