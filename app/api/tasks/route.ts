@@ -1,4 +1,4 @@
-import { refreshSessionIfNeeded } from "@/lib/hubspot";
+import { HUBSPOT_API_BASE, refreshSessionIfNeeded } from "@/lib/hubspot";
 
 export async function POST(request: Request) {
   const authed = await refreshSessionIfNeeded();
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
   const { title, due_date, priority, owner_id, dealId } = await request.json();
 
-  if (!title?.trim() || !dealId) {
+  if (!title?.trim() || !dealId || isNaN(Number(dealId))) {
     return Response.json(
       { error: "title and dealId are required" },
       { status: 400 }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     (body.engagement as Record<string, unknown>).ownerId = Number(owner_id);
   }
 
-  const res = await fetch("https://api.hubapi.com/engagements/v1/engagements", {
+  const res = await fetch(`${HUBSPOT_API_BASE}/engagements/v1/engagements`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

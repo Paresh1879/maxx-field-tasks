@@ -1,6 +1,8 @@
 import { Client } from "@hubspot/api-client";
 import { getSession } from "@/lib/session";
 
+export const HUBSPOT_API_BASE = "https://api.hubapi.com";
+
 export async function getHubspotClient(): Promise<Client> {
   const session = await getSession();
   if (!session.accessToken) throw new Error("Not authenticated");
