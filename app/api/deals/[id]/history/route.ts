@@ -48,24 +48,24 @@ export async function GET(
     fetch(
       `${HUBSPOT_API_BASE}/engagements/v1/engagements/associated/deal/${dealId}/paged?count=25`,
       { headers }
-    ),
+    ).catch(() => null),
     fetch(
       `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${dealId}/associations/contacts?limit=20`,
       { headers }
-    ),
+    ).catch(() => null),
     fetch(
       `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${dealId}/associations/tasks?limit=50`,
       { headers: taskHeaders }
-    ),
+    ).catch(() => null),
   ]);
 
   const activities: HistoryActivity[] = [];
 
-  const contactIds: string[] = assocRes.ok
+  const contactIds: string[] = assocRes?.ok
     ? ((await assocRes.json()).results ?? []).map((r: { id: string }) => r.id)
     : [];
 
-  const taskIds: string[] = taskAssocRes.ok
+  const taskIds: string[] = taskAssocRes?.ok
     ? ((await taskAssocRes.json()).results ?? []).map((r: { id: string }) => r.id)
     : [];
 
@@ -92,7 +92,7 @@ export async function GET(
       : null,
   ]);
 
-  if (engRes.ok) {
+  if (engRes?.ok) {
     const data = await engRes.json();
     for (const item of data.results ?? []) {
       const type: string = item.engagement?.type ?? "";

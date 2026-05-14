@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { HUBSPOT_API_BASE } from "@/lib/hubspot";
 import { getSession } from "@/lib/session";
 
 export async function GET(request: Request) {
@@ -6,7 +7,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
 
   if (!code) {
-    return new Response("Missing code", { status: 400 });
+    return Response.json({ error: "Missing code" }, { status: 400 });
   }
 
   const body = new URLSearchParams({
@@ -17,14 +18,14 @@ export async function GET(request: Request) {
     code,
   });
 
-  const res = await fetch("https://api.hubapi.com/oauth/v1/token", {
+  const res = await fetch(`${HUBSPOT_API_BASE}/oauth/v1/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
   });
 
   if (!res.ok) {
-    return new Response("Failed to exchange token", { status: 502 });
+    return Response.json({ error: "Failed to exchange token" }, { status: 502 });
   }
 
   const tokens = await res.json();

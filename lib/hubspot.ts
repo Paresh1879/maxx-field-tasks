@@ -24,12 +24,18 @@ export async function refreshSessionIfNeeded(): Promise<boolean> {
       client_secret: process.env.HUBSPOT_CLIENT_SECRET!,
       refresh_token: session.refreshToken,
     });
-    const res = await fetch("https://api.hubapi.com/oauth/v1/token", {
+    const res = await fetch(`${HUBSPOT_API_BASE}/oauth/v1/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: body.toString(),
     });
-    if (!res.ok) return false;
+    if (!res.ok) {
+      session.accessToken = "";
+      session.refreshToken = "";
+      session.expiresAt = 0;
+      await session.save();
+      return false;
+    }
     const data = await res.json();
     session.accessToken = data.access_token;
     session.refreshToken = data.refresh_token;

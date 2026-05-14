@@ -19,9 +19,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const dueTimestamp = due_date
-    ? new Date(due_date).getTime()
-    : Date.now() + 7 * 24 * 60 * 60 * 1000;
+  if (priority && !["LOW", "MEDIUM", "HIGH"].includes(priority)) {
+    return Response.json({ error: "Invalid priority" }, { status: 400 });
+  }
+
+  const dueMs = due_date ? new Date(due_date).getTime() : NaN;
+  if (due_date && (isNaN(dueMs) || !/^\d{4}-\d{2}-\d{2}$/.test(due_date))) {
+    return Response.json({ error: "Invalid due_date" }, { status: 400 });
+  }
+
+  const dueTimestamp = !isNaN(dueMs) ? dueMs : Date.now() + 7 * 24 * 60 * 60 * 1000;
 
   const body: Record<string, unknown> = {
     engagement: {
