@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import type { DealHistory, HistoryActivity, HistoryContact } from "@/app/api/deals/[id]/history/route";
 
@@ -17,6 +17,13 @@ type Deal = {
 
 type HistoryState = DealHistory | "loading" | "error";
 
+const TYPE_STYLES: Record<HistoryActivity["type"], { icon: string; label: string }> = {
+  task:  { icon: "bg-indigo-100 text-indigo-600", label: "text-indigo-600" },
+  call:  { icon: "bg-green-100 text-green-600",   label: "text-green-600" },
+  email: { icon: "bg-purple-100 text-purple-600", label: "text-purple-600" },
+  note:  { icon: "bg-amber-100 text-amber-600",   label: "text-amber-600" },
+};
+
 function formatCurrency(amount?: string) {
   if (!amount) return null;
   const n = parseFloat(amount);
@@ -28,24 +35,22 @@ function formatCurrency(amount?: string) {
   }).format(n);
 }
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return null;
-  const d = /^\d+$/.test(dateStr) ? new Date(Number(dateStr)) : new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
+function toMMDDYYYY(d: Date): string {
   const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(d.getUTCDate()).padStart(2, "0");
-  const yyyy = d.getUTCFullYear();
-  return `${mm}/${dd}/${yyyy}`;
+  return `${mm}/${dd}/${d.getUTCFullYear()}`;
+}
+
+function formatDate(dateStr?: string): string | null {
+  if (!dateStr) return null;
+  const d = /^\d+$/.test(dateStr) ? new Date(Number(dateStr)) : new Date(dateStr);
+  return isNaN(d.getTime()) ? null : toMMDDYYYY(d);
 }
 
 function formatTimestamp(ts: number): string {
   if (!ts) return "";
   const d = new Date(ts);
-  if (isNaN(d.getTime())) return "";
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const yyyy = d.getUTCFullYear();
-  return `${mm}/${dd}/${yyyy}`;
+  return isNaN(d.getTime()) ? "" : toMMDDYYYY(d);
 }
 
 function ActivityIcon({ type }: { type: HistoryActivity["type"] }) {
@@ -141,14 +146,7 @@ function HistoryPanel({ history }: { history: HistoryState }) {
           </p>
           <ul className="space-y-2">
             {activities.map((a: HistoryActivity) => {
-              const typeStyle =
-                a.type === "task"
-                  ? { icon: "bg-indigo-100 text-indigo-600", label: "text-indigo-600" }
-                  : a.type === "call"
-                  ? { icon: "bg-green-100 text-green-600", label: "text-green-600" }
-                  : a.type === "email"
-                  ? { icon: "bg-purple-100 text-purple-600", label: "text-purple-600" }
-                  : { icon: "bg-amber-100 text-amber-600", label: "text-amber-600" };
+              const typeStyle = TYPE_STYLES[a.type];
               return (
                 <li key={a.id} className="flex gap-2.5 items-start">
                   <div className={`mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${typeStyle.icon}`}>
@@ -197,6 +195,7 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [historyCache, setHistoryCache] = useState<Record<string, HistoryState>>({});
+  const fetchedRef = useRef<Set<string>>(new Set());
 
   const handleSearch = useCallback((v: string) => {
     setSearch(v);
@@ -210,7 +209,8 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
         return;
       }
       setExpandedId(dealId);
-      if (historyCache[dealId]) return;
+      if (fetchedRef.current.has(dealId)) return;
+      fetchedRef.current.add(dealId);
 
       setHistoryCache((prev) => ({ ...prev, [dealId]: "loading" }));
       try {
@@ -222,7 +222,7 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
         setHistoryCache((prev) => ({ ...prev, [dealId]: "error" }));
       }
     },
-    [expandedId, historyCache]
+    [expandedId]
   );
 
   const filtered = useMemo(() => {

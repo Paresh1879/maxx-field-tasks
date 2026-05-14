@@ -15,7 +15,7 @@ export default function LoginPage() {
         <a
           href="/api/auth/login"
           onClick={() => setLoading(true)}
-          className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors"
+          className={`flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors ${loading ? "pointer-events-none opacity-70" : ""}`}
         >
           {loading ? (
             <>
