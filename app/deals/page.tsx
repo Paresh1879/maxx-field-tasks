@@ -78,7 +78,17 @@ export default async function DealsPage() {
 
   return (
     <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Open Deals</h1>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-2xl font-bold text-gray-900">Open Deals</h1>
+        <form action="/api/auth/logout" method="POST">
+          <button
+            type="submit"
+            className="text-sm text-gray-400 active:text-gray-600 transition"
+          >
+            Sign out
+          </button>
+        </form>
+      </div>
       <p className="text-gray-400 text-sm mb-6">
         Tap a deal to log a task after your visit.
       </p>
