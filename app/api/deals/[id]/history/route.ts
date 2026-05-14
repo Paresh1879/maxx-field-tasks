@@ -46,7 +46,7 @@ export async function GET(
 
   const [engRes, assocRes, taskAssocRes] = await Promise.all([
     fetch(
-      `${HUBSPOT_API_BASE}/engagements/v1/engagements/associated/deal/${dealId}/paged?count=25`,
+      `${HUBSPOT_API_BASE}/engagements/v1/engagements/associated/deal/${dealId}/paged?count=100`,
       { headers }
     ).catch(() => null),
     fetch(
