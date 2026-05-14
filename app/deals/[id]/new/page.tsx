@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getHubspotClient } from "@/lib/hubspot";
 import { getSession } from "@/lib/session";
 import TaskDraftForm from "./TaskDraftForm";
+import ActivityPanel from "./ActivityPanel";
 
 export type Owner = { id: string; name: string };
 
@@ -67,6 +68,10 @@ export default async function NewTaskPage({
       </p>
 
       <TaskDraftForm dealId={id} dealName={dealName} owners={owners} currentOwnerId={currentOwnerId} />
+
+      <div className="mt-6 rounded-2xl border border-gray-100 bg-white shadow-sm px-4 pt-3 pb-4">
+        <ActivityPanel dealId={id} />
+      </div>
     </main>
   );
 }
