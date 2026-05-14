@@ -82,7 +82,7 @@ function ActivityIcon({ type }: { type: HistoryActivity["type"] }) {
   );
 }
 
-function HistoryPanel({ history }: { history: HistoryState }) {
+function HistoryPanel({ history, onRetry }: { history: HistoryState; onRetry: () => void }) {
   if (history === "loading") {
     return (
       <div className="flex items-center justify-center py-6">
@@ -96,9 +96,12 @@ function HistoryPanel({ history }: { history: HistoryState }) {
 
   if (history === "error") {
     return (
-      <p className="text-xs text-red-400 py-3 text-center">
-        Could not load history.
-      </p>
+      <div className="flex flex-col items-center gap-2 py-3">
+        <p className="text-xs text-red-400">Could not load history.</p>
+        <button onClick={onRetry} className="text-xs text-indigo-500 underline">
+          Retry
+        </button>
+      </div>
     );
   }
 
@@ -370,7 +373,15 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                             <dd className="text-gray-800 font-medium">{stage ?? "—"}</dd>
                           </div>
                         </dl>
-                        {history && <HistoryPanel history={history} />}
+                        {history && (
+                          <HistoryPanel
+                            history={history}
+                            onRetry={() => {
+                              fetchedRef.current.delete(deal.id);
+                              handleExpand(deal.id);
+                            }}
+                          />
+                        )}
                         <Link
                           href={`/deals/${deal.id}/new`}
                           className="mt-4 flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold active:bg-indigo-700 transition"

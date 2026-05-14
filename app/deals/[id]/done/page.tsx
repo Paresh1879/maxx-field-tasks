@@ -10,7 +10,7 @@ export default async function DonePage({
   const { id } = await params;
   const { taskId, taskUrl } = await searchParams;
 
-  const decoded = taskUrl ? decodeURIComponent(taskUrl) : null;
+  const decoded = taskUrl ? (() => { try { return decodeURIComponent(taskUrl); } catch { return null; } })() : null;
   const hubspotLink = decoded?.startsWith("https://app.hubspot.com/") ? decoded : null;
 
   return (
