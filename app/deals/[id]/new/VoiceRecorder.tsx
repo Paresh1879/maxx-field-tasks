@@ -38,12 +38,12 @@ export default function VoiceRecorder({
             body: blob,
             headers: { "Content-Type": mimeType },
           });
-          if (!res.ok) throw new Error();
-          const { transcript } = await res.json();
-          if (transcript) onTranscript(transcript);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+          if (data.transcript) onTranscript(data.transcript);
           else setError("No speech detected. Try again.");
-        } catch {
-          setError("Transcription failed. Check your connection.");
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Transcription failed.");
         } finally {
           setState("idle");
         }

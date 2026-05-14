@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   }
 
   const res = await fetch(
-    "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&language=en",
+    "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true",
     {
       method: "POST",
       headers: {
@@ -28,7 +28,12 @@ export async function POST(request: Request) {
   );
 
   if (!res.ok) {
-    return Response.json({ error: "Transcription failed" }, { status: 502 });
+    const err = await res.json().catch(() => ({}));
+    console.error("Deepgram error:", err);
+    return Response.json(
+      { error: err?.err_msg || `Deepgram error ${res.status}` },
+      { status: 502 }
+    );
   }
 
   const data = await res.json();
