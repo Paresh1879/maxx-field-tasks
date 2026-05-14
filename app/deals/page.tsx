@@ -30,21 +30,16 @@ async function getOpenDeals(): Promise<Deal[]> {
   );
   const ownerId = currentOwner ? String(currentOwner.id) : null;
 
-  const filters: Parameters<typeof client.crm.deals.searchApi.doSearch>[0]["filterGroups"][0]["filters"] = [
+  const filters = [
     {
       propertyName: "dealstage",
       operator: FilterOperatorEnum.NotIn,
       values: ["closedwon", "closedlost"],
     },
+    ...(ownerId
+      ? [{ propertyName: "hubspot_owner_id", operator: FilterOperatorEnum.Eq, value: ownerId }]
+      : []),
   ];
-
-  if (ownerId) {
-    filters.push({
-      propertyName: "hubspot_owner_id",
-      operator: FilterOperatorEnum.Eq,
-      value: ownerId,
-    });
-  }
 
   const res = await client.crm.deals.searchApi.doSearch({
     filterGroups: [{ filters }],
