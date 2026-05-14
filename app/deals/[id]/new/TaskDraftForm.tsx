@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Owner } from "./page";
+import VoiceRecorder from "./VoiceRecorder";
 
 type Priority = "LOW" | "MEDIUM" | "HIGH";
 
@@ -95,6 +96,10 @@ export default function TaskDraftForm({
 
       {/* Note textarea */}
       <div className="flex flex-col gap-3">
+        <VoiceRecorder
+          disabled={submitting || suggesting}
+          onTranscript={(t) => setNote((prev) => prev ? `${prev} ${t}` : t)}
+        />
         <textarea
           className="w-full rounded-2xl border border-gray-200 bg-white p-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition disabled:opacity-50"
           rows={5}
