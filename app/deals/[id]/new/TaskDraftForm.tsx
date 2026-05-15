@@ -27,12 +27,7 @@ export default function TaskDraftForm({
 }) {
   const router = useRouter();
   const [note, setNote] = useState("");
-  const [fields, setFields] = useState<TaskFields>({
-    title: "",
-    due_date: "",
-    priority: "",
-    owner_id: currentOwnerId,
-  });
+  const [fields, setFields] = useState<TaskFields>({ title: "", due_date: "", priority: "", owner_id: currentOwnerId });
   const [suggesting, setSuggesting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [suggested, setSuggested] = useState(false);
@@ -52,12 +47,7 @@ export default function TaskDraftForm({
       if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Suggestion failed");
       const data = await res.json();
-      setFields((f) => ({
-        title: data.title ?? "",
-        due_date: data.due_date ?? "",
-        priority: data.priority ?? "",
-        owner_id: data.owner_id ?? f.owner_id,
-      }));
+      setFields((f) => ({ title: data.title ?? "", due_date: data.due_date ?? "", priority: data.priority ?? "", owner_id: data.owner_id ?? f.owner_id }));
       setSuggested(true);
     } catch {
       setError("Couldn't generate suggestion. Check your connection and try again.");
@@ -88,61 +78,63 @@ export default function TaskDraftForm({
     setSubmitting(false);
   }
 
-  const inputClass =
-    "w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition disabled:opacity-50";
+  const fieldClass = "w-full bg-white border border-[#ebebeb] rounded-xl px-3.5 py-3 text-[15px] text-[#111111] placeholder-[#999999] focus:outline-none focus:border-[#F97316] transition disabled:opacity-50";
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-      {/* Note textarea */}
-      <div className="flex flex-col gap-3">
-        <VoiceRecorder
-          disabled={submitting || suggesting}
-          onTranscript={(t) => setNote((prev) => prev ? `${prev} ${t}` : t)}
-        />
+      {/* Note */}
+      <div className="bg-white rounded-xl border border-[#ebebeb] px-4 py-3">
         <textarea
-          className="w-full rounded-2xl border border-gray-200 bg-white p-4 text-base text-gray-900 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition disabled:opacity-50"
+          className="w-full text-[15px] text-[#111111] placeholder-[#999999] resize-none focus:outline-none disabled:opacity-50 bg-transparent"
           rows={5}
           placeholder={`What happened with ${dealName}?`}
           value={note}
           disabled={submitting}
           onChange={(e) => setNote(e.target.value)}
         />
-        <button
-          type="button"
-          onClick={handleSuggest}
-          disabled={!note.trim() || suggesting || submitting}
-          className="w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 py-3.5 text-white font-semibold text-base shadow-md disabled:opacity-40 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-        >
-          {suggesting ? (
-            <>
-              <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-              Thinking…
-            </>
-          ) : (
-            <>✦ Suggest task</>
-          )}
-        </button>
+        <div className="flex items-center justify-between pt-2 border-t border-[#f0f0f0]">
+          <VoiceRecorder
+            disabled={submitting || suggesting}
+            onTranscript={(t) => setNote((prev) => prev ? `${prev} ${t}` : t)}
+          />
+          <button
+            type="button"
+            onClick={handleSuggest}
+            disabled={!note.trim() || suggesting || submitting}
+            className="flex items-center gap-1.5 text-[13px] font-semibold text-[#111111] disabled:opacity-30 active:opacity-60 transition"
+          >
+            {suggesting ? (
+              <>
+                <span className="w-3.5 h-3.5 rounded-full border-2 border-[#ebebeb] border-t-[#111] animate-spin" />
+                Thinking…
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74L12 2z" />
+                </svg>
+                Draft Task
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Fields card */}
-      <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+      {/* Task fields */}
+      <div className="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
         {suggested && (
-          <div className="bg-indigo-50 border-b border-indigo-100 px-4 py-2 flex items-center gap-2">
-            <span className="text-indigo-400 text-xs">✦</span>
-            <span className="text-xs font-medium text-indigo-600">
-              Review and edit before saving
-            </span>
+          <div className="px-4 py-2.5 bg-[#FAFAF8] border-b border-[#ebebeb]">
+            <p className="text-[12px] text-[#666666]">AI suggestion — review before saving</p>
           </div>
         )}
+
         <div className="p-4 flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
-              Task title
-            </label>
+            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Task title</label>
             <input
               type="text"
-              className={inputClass}
+              className={fieldClass}
               placeholder="e.g. Send follow-up quote"
               value={fields.title}
               disabled={submitting}
@@ -151,12 +143,10 @@ export default function TaskDraftForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
-              Due date
-            </label>
+            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Due date</label>
             <input
               type="date"
-              className={inputClass}
+              className={fieldClass}
               value={fields.due_date}
               disabled={submitting}
               onChange={(e) => setFields((f) => ({ ...f, due_date: e.target.value }))}
@@ -164,39 +154,37 @@ export default function TaskDraftForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
-              Priority
-            </label>
-            <select
-              className={inputClass}
-              value={fields.priority}
-              disabled={submitting}
-              onChange={(e) =>
-                setFields((f) => ({ ...f, priority: e.target.value as Priority | "" }))
-              }
-            >
-              <option value="">Select…</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-            </select>
+            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Priority</label>
+            <div className="flex gap-2">
+              {(["LOW", "MEDIUM", "HIGH"] as Priority[]).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setFields((f) => ({ ...f, priority: p }))}
+                  className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold border transition disabled:opacity-40 ${
+                    fields.priority === p
+                      ? "bg-[#111111] text-white border-[#111111]"
+                      : "bg-white text-[#666666] border-[#ebebeb] active:bg-[#FAFAF8]"
+                  }`}
+                >
+                  {p.charAt(0) + p.slice(1).toLowerCase()}
+                </button>
+              ))}
+            </div>
           </div>
 
           {owners.length > 0 && (
             <div>
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
-                Owner
-              </label>
+              <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Owner</label>
               <select
-                className={inputClass}
+                className={fieldClass}
                 value={fields.owner_id}
                 disabled={submitting}
                 onChange={(e) => setFields((f) => ({ ...f, owner_id: e.target.value }))}
               >
                 <option value="">Unassigned</option>
-                {owners.map((o) => (
-                  <option key={o.id} value={o.id}>{o.name}</option>
-                ))}
+                {owners.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
               </select>
             </div>
           )}
@@ -204,15 +192,15 @@ export default function TaskDraftForm({
       </div>
 
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
+          <p className="text-[13px] text-red-600">{error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={!fields.title.trim() || submitting || suggesting}
-        className="w-full rounded-2xl bg-gray-900 py-4 text-white font-semibold text-base shadow-md disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        className="w-full py-4 rounded-xl bg-[#F97316] text-white font-semibold text-[15px] disabled:opacity-40 active:opacity-80 transition flex items-center justify-center gap-2"
       >
         {submitting ? (
           <>
