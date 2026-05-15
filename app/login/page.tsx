@@ -1,21 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
-      <div className="w-full max-w-sm text-center space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Maxx Field Tasks</h1>
-        <p className="text-gray-500 text-sm">
-          Turn field meeting notes into HubSpot tasks.
+    <main className="min-h-screen bg-white flex flex-col">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 pb-8">
+        <Image
+          src="/logo.png"
+          alt="Maxx Orthopedics"
+          width={160}
+          height={80}
+          style={{ height: "auto" }}
+          priority
+          className="mb-12"
+        />
+        <p className="text-[#666666] text-base mb-8 text-center">
+          Sign in to log tasks and notes from the field.
         </p>
         <a
           href="/api/auth/login"
           onClick={() => setLoading(true)}
-          className={`flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors ${loading ? "pointer-events-none opacity-70" : ""}`}
+          className={`inline-flex items-center justify-center gap-2 bg-[#F97316] text-white font-semibold text-[16px] px-8 py-4 rounded-2xl transition-opacity ${loading ? "opacity-60 pointer-events-none" : ""}`}
         >
           {loading ? (
             <>
