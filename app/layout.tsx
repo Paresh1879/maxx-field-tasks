@@ -10,7 +10,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Maxx Field Tasks",
+  title: "Maxx HubApp",
   description: "Turn field meeting notes into HubSpot tasks.",
 };
 
