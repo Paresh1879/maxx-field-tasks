@@ -96,7 +96,7 @@ export async function GET(
     const data = await engRes.json();
     for (const item of data.results ?? []) {
       const type: string = item.engagement?.type ?? "";
-      if (!["NOTE", "CALL", "EMAIL"].includes(type)) continue;
+      if (!["NOTE", "CALL", "EMAIL", "TASK"].includes(type)) continue;
       const raw = item.metadata?.body ?? item.metadata?.html ?? "";
       activities.push({
         id: String(item.engagement.id),
