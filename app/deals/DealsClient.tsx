@@ -68,7 +68,7 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
   const empty = contacts.length === 0 && activities.length === 0;
 
   const typeColors: Record<HistoryActivity["type"], string> = {
-    task: "#1565a0", call: "#2e7d32", email: "#7b1fa2", note: "#d97706",
+    task: "#7b1fa2", call: "#0891b2", email: "#1565a0", note: "#2e7d32",
   };
 
   return (
@@ -221,11 +221,19 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         <p style={{ fontWeight: 700, fontSize: 16, color: "#0c2d48", lineHeight: 1.3, flex: 1, minWidth: 0 }}>{name}</p>
                         {amount && <span style={{ fontSize: 15, fontWeight: 700, color: "#0c2d48", flexShrink: 0 }}>{amount}</span>}
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
-                        {stage && <span style={{ fontSize: 12, color: "#374151" }}>{stage}</span>}
-                        {stage && closeDate && <span style={{ color: "#94a3b8" }}>·</span>}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                        {stage && (
+                          <span style={{
+                            fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 5,
+                            background: "#eaf2f8", color: "#1565a0",
+                          }}>{stage}</span>
+                        )}
                         {closeDate && (
-                          <span style={{ fontSize: 12, fontWeight: 500, color: isOverdue ? "#dc2626" : isSoon ? "#d97706" : "#374151" }}>
+                          <span style={{
+                            fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 5,
+                            background: isOverdue ? "#fef2f2" : isSoon ? "#fffbeb" : "#f4f8fb",
+                            color: isOverdue ? "#dc2626" : isSoon ? "#d97706" : "#6b7280",
+                          }}>
                             {isOverdue ? `Overdue ${closeDate}` : isSoon ? `Due ${closeDate}` : closeDate}
                           </span>
                         )}
@@ -238,8 +246,9 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         href={`/deals/${deal.id}/note`}
                         style={{
                           flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                          padding: "14px 0", fontSize: 13, fontWeight: 700, color: "#1565a0",
+                          padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#2e7d32",
                           borderRight: "1px solid #dce4ec", textDecoration: "none",
+                          background: "transparent",
                         }}
                       >
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -251,14 +260,14 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         href={`/deals/${deal.id}/new`}
                         style={{
                           flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                          padding: "14px 0", fontSize: 13, fontWeight: 700, color: "#2e86c1",
-                          textDecoration: "none",
+                          padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#7b1fa2",
+                          textDecoration: "none", background: "transparent",
                         }}
                       >
-                        Log Task
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 11l3 3L22 4" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                         </svg>
+                        Log Task
                       </Link>
                     </div>
 
