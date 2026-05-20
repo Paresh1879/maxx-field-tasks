@@ -68,7 +68,7 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
   const empty = contacts.length === 0 && activities.length === 0;
 
   const typeColors: Record<HistoryActivity["type"], string> = {
-    task: "#1565a0", call: "#2e7d32", email: "#7b1fa2", note: "#2e86c1",
+    task: "#1565a0", call: "#2e7d32", email: "#7b1fa2", note: "#d97706",
   };
 
   return (
@@ -112,7 +112,7 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
                       </Link>
                     )}
                   </div>
-                  {a.subject && <p style={{ fontSize: 14, fontWeight: 600, color: "#0c2d48", lineHeight: 1.3 }}>{a.subject}</p>}
+                  {a.subject && <p style={{ fontSize: 14, fontWeight: 400, color: "#0c2d48", lineHeight: 1.3 }}>{a.subject}</p>}
                   {a.body && <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.4, marginTop: 2, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{a.body}</p>}
                 </div>
               </li>

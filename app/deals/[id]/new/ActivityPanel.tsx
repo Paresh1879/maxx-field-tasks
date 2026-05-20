@@ -83,7 +83,7 @@ export default function ActivityPanel({ dealId }: { dealId: string }) {
                       </Link>
                     )}
                   </div>
-                  {a.subject && <p className="text-[13px] font-medium text-[#111111] leading-snug">{a.subject}</p>}
+                  {a.subject && <p className="text-[13px] font-normal text-[#111111] leading-snug">{a.subject}</p>}
                   {a.body && <p className="text-[13px] text-[#666666] leading-snug line-clamp-2 mt-0.5">{a.body}</p>}
                 </div>
               </li>
