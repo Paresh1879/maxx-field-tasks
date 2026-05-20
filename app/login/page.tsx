@@ -34,7 +34,7 @@ export default function LoginPage() {
             onClick={() => setLoading(true)}
             style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
-              background: loading ? "#5dade2" : "#1565a0",
+              background: loading ? "#fb923c" : "#F97316",
               color: "#fff", fontWeight: 700, fontSize: 15,
               padding: "14px 32px", borderRadius: 12, textDecoration: "none",
               transition: "all 0.15s", pointerEvents: loading ? "none" : "auto",
