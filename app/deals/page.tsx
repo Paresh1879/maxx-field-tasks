@@ -146,7 +146,6 @@ export default async function DashboardPage() {
   return (
     <div style={{ minHeight: "100vh", background: "#f4f8fb", fontFamily: "var(--font-outfit), sans-serif" }}>
       <style>{`
-        @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-12px); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         .dash-card {
           all: unset; box-sizing: border-box; cursor: pointer;
@@ -169,24 +168,7 @@ export default async function DashboardPage() {
         }
       `}</style>
 
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 16px 48px", position: "relative" }}>
-        {/* Floating bg circles */}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, overflow: "hidden", pointerEvents: "none" }}>
-          {([
-            { top: "12%", left: "6%", right: undefined, size: 60, opacity: 0.04, delay: "0s" },
-            { top: "22%", left: undefined, right: "10%", size: 80, opacity: 0.03, delay: "1s" },
-            { top: "55%", left: "12%", right: undefined, size: 40, opacity: 0.05, delay: "2s" },
-            { top: "40%", left: undefined, right: "18%", size: 50, opacity: 0.04, delay: "0.5s" },
-          ] as { top: string; left?: string; right?: string; size: number; opacity: number; delay: string }[]).map((c, i) => (
-            <div key={i} style={{
-              position: "absolute", top: c.top, left: c.left, right: c.right,
-              width: c.size, height: c.size, borderRadius: "50%",
-              border: `2px solid rgba(21,101,160,${c.opacity * 5})`,
-              background: `rgba(21,101,160,${c.opacity})`,
-              animation: `float ${3 + i}s ease-in-out ${c.delay} infinite alternate`,
-            }} />
-          ))}
-        </div>
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 16px 48px" }}>
 
         {/* Sign out */}
         <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 16, position: "relative" }}>
