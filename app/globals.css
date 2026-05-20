@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-dm-sans);
+  --font-sans: var(--font-outfit);
 }
 
 :root {
@@ -13,9 +13,9 @@
 }
 
 body {
-  background: #FAFAF8;
-  color: #111111;
-  font-family: var(--font-dm-sans), -apple-system, system-ui, sans-serif;
+  background: #f4f8fb;
+  color: #0c2d48;
+  font-family: var(--font-outfit), -apple-system, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

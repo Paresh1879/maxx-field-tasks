@@ -1,36 +1,21 @@
-export default function DealsLoading() {
+export default function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
-      <div className="bg-white border-b border-[#ebebeb]">
-        <div className="max-w-lg mx-auto px-4 pt-5 pb-4">
-          <div className="flex justify-end mb-4">
-            <div className="h-5 w-14 bg-[#ebebeb] rounded animate-pulse" />
-          </div>
-          <div className="flex justify-center mb-5">
-            <div className="h-12 w-40 bg-[#ebebeb] rounded animate-pulse" />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="h-6 w-24 bg-[#ebebeb] rounded animate-pulse" />
-            <div className="h-5 w-20 bg-[#ebebeb] rounded animate-pulse" />
-          </div>
+    <div style={{ minHeight: "100vh", background: "#f4f8fb" }}>
+      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }`}</style>
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 16px" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 16, marginBottom: 8 }}>
+          <div style={{ height: 32, width: 72, background: "#dce4ec", borderRadius: 10, animation: "pulse 1.5s ease infinite" }} />
         </div>
-      </div>
-      <div className="max-w-lg mx-auto px-4 pt-4 pb-12">
-        <div className="h-11 bg-white border border-[#ebebeb] rounded-xl animate-pulse mb-3" />
-        <ul className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li key={i} className="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
-              <div className="px-4 py-4">
-                <div className="h-4 bg-[#ebebeb] rounded animate-pulse w-3/4 mb-2" />
-                <div className="h-3 bg-[#ebebeb] rounded animate-pulse w-1/2" />
-              </div>
-              <div className="flex border-t border-[#f0f0f0]">
-                <div className="flex-1 h-12 bg-[#FAFAF8] animate-pulse border-r border-[#f0f0f0]" />
-                <div className="flex-1 h-12 bg-[#FAFAF8] animate-pulse" />
-              </div>
-            </li>
+        <div style={{ textAlign: "center", padding: "24px 0 32px" }}>
+          <div style={{ width: 64, height: 64, borderRadius: 18, background: "#dce4ec", margin: "0 auto 16px", animation: "pulse 1.5s ease infinite" }} />
+          <div style={{ height: 28, width: 200, background: "#dce4ec", borderRadius: 10, margin: "0 auto 12px", animation: "pulse 1.5s ease infinite" }} />
+          <div style={{ height: 16, width: 280, background: "#eaf2f8", borderRadius: 8, margin: "0 auto", animation: "pulse 1.5s ease infinite" }} />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} style={{ background: "#fff", borderRadius: 16, border: "1px solid #dce4ec", padding: 24, animation: "pulse 1.5s ease infinite", height: 160 }} />
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );

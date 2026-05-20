@@ -51,15 +51,15 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
   if (history === "loading") {
     return (
       <div className="py-4 flex justify-center">
-        <div className="w-4 h-4 rounded-full border-2 border-[#ebebeb] border-t-[#999] animate-spin" />
+        <div style={{ width: 16, height: 16, borderRadius: "50%", border: "2.5px solid #d1d5db", borderTopColor: "#1565a0", animation: "spin 0.7s linear infinite" }} />
       </div>
     );
   }
   if (history === "error") {
     return (
       <div className="py-3 text-center">
-        <p className="text-[13px] text-[#999999]">Could not load history.</p>
-        <button onClick={onRetry} className="text-[13px] text-[#F97316] mt-1">Retry</button>
+        <p style={{ fontSize: 13, color: "#6b7280" }}>Could not load history.</p>
+        <button onClick={onRetry} style={{ fontSize: 13, color: "#1565a0", marginTop: 4, background: "none", border: "none", cursor: "pointer" }}>Retry</button>
       </div>
     );
   }
@@ -68,23 +68,23 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
   const empty = contacts.length === 0 && activities.length === 0;
 
   const typeColors: Record<HistoryActivity["type"], string> = {
-    task: "text-[#2563EB]", call: "text-green-700", email: "text-violet-700", note: "text-[#F97316]",
+    task: "#1565a0", call: "#2e7d32", email: "#7b1fa2", note: "#2e86c1",
   };
 
   return (
     <div className="space-y-4">
       {contacts.length > 0 && (
         <div>
-          <p className="text-[11px] font-semibold text-[#555555] uppercase tracking-wider mb-2">Contacts</p>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>Contacts</p>
           <div className="flex flex-wrap gap-2">
             {contacts.map((c: HistoryContact) => (
-              <div key={c.id} className="flex items-center gap-1.5 bg-[#FAFAF8] rounded-lg px-2.5 py-1.5">
-                <div className="w-5 h-5 rounded-full bg-[#ebebeb] flex items-center justify-center shrink-0">
-                  <span className="text-[#666666] text-[9px] font-semibold">{c.name.charAt(0).toUpperCase()}</span>
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 6, background: "#eaf2f8", borderRadius: 10, padding: "6px 10px" }}>
+                <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#dce4ec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ color: "#374151", fontSize: 9, fontWeight: 700 }}>{c.name.charAt(0).toUpperCase()}</span>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-[#111111] truncate leading-tight">{c.name}</p>
-                  {c.title && <p className="text-[11px] text-[#999999] truncate leading-tight">{c.title}</p>}
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#0c2d48", lineHeight: 1.2 }}>{c.name}</p>
+                  {c.title && <p style={{ fontSize: 11, color: "#6b7280", lineHeight: 1.2 }}>{c.title}</p>}
                 </div>
               </div>
             ))}
@@ -94,26 +94,26 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
 
       {activities.length > 0 && (
         <div>
-          <p className="text-[11px] font-semibold text-[#555555] uppercase tracking-wider mb-2">Recent Activity</p>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>Recent Activity</p>
           <ul className="space-y-3">
             {activities.map((a: HistoryActivity) => (
               <li key={a.id} className="flex gap-2.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#333333] shrink-0 mt-1.5" />
-                <div className="flex-1 min-w-0">
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#0c2d48", flexShrink: 0, marginTop: 6 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`text-[11px] font-bold uppercase tracking-wide ${typeColors[a.type]}`}>{a.type}</span>
-                    <span className="text-[12px] text-[#555555]">{formatTimestamp(a.timestamp)}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: typeColors[a.type] }}>{a.type}</span>
+                    <span style={{ fontSize: 12, color: "#374151" }}>{formatTimestamp(a.timestamp)}</span>
                     {(a.type === "note" || a.type === "task") && (
                       <Link
                         href={a.type === "note" ? `/deals/${dealId}/note/${a.id}/edit` : `/deals/${dealId}/task/${a.id}/edit`}
-                        className="ml-auto text-[11px] font-medium text-[#999999] border border-[#e0e0e0] rounded-md px-1.5 py-0.5 active:bg-[#FAFAF8] transition"
+                        style={{ marginLeft: "auto", fontSize: 11, fontWeight: 600, color: "#6b7280", border: "1px solid #dce4ec", borderRadius: 6, padding: "2px 8px", textDecoration: "none" }}
                       >
                         Edit
                       </Link>
                     )}
                   </div>
-                  {a.subject && <p className="text-[14px] font-semibold text-[#111111] leading-snug">{a.subject}</p>}
-                  {a.body && <p className="text-[13px] text-[#333333] leading-snug line-clamp-2 mt-0.5">{a.body}</p>}
+                  {a.subject && <p style={{ fontSize: 14, fontWeight: 600, color: "#0c2d48", lineHeight: 1.3 }}>{a.subject}</p>}
+                  {a.body && <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.4, marginTop: 2, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{a.body}</p>}
                 </div>
               </li>
             ))}
@@ -121,7 +121,7 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
         </div>
       )}
 
-      {empty && <p className="text-[13px] text-[#999999] text-center py-2">No activity recorded yet.</p>}
+      {empty && <p style={{ fontSize: 13, color: "#6b7280", textAlign: "center", padding: "8px 0" }}>No activity recorded yet.</p>}
     </div>
   );
 }
@@ -170,9 +170,11 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
 
   return (
     <>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
       {/* Search */}
-      <div className="relative mb-3">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div style={{ position: "relative", marginBottom: 12 }}>
+        <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#94a3b8" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
         </svg>
         <input
@@ -180,15 +182,21 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
           placeholder="Search deals…"
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
-          className="w-full bg-white border border-[#ebebeb] rounded-xl pl-9 pr-3 py-3 text-[15px] text-[#111111] placeholder-[#999999] focus:outline-none focus:border-[#F97316] transition"
+          style={{
+            width: "100%", background: "#fff", border: "1px solid #dce4ec", borderRadius: 12,
+            paddingLeft: 36, paddingRight: 12, paddingTop: 12, paddingBottom: 12,
+            fontSize: 15, color: "#0c2d48", outline: "none", boxSizing: "border-box",
+          }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
         />
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-[#999999] text-center mt-16 text-[15px]">No open deals found.</p>
+        <p style={{ color: "#6b7280", textAlign: "center", marginTop: 64, fontSize: 15 }}>No open deals found.</p>
       ) : (
         <>
-          <ul className="space-y-2">
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.slice(0, visibleCount).map((deal) => {
               const name = deal.properties.dealname ?? "Unnamed Deal";
               const amount = formatCurrency(deal.properties.amount);
@@ -203,46 +211,52 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
 
               return (
                 <li key={deal.id}>
-                  <div className="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+                  <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", boxShadow: "0 1px 3px rgba(12,45,72,0.04)", overflow: "hidden" }}>
                     {/* Main info row */}
                     <button
                       onClick={() => handleExpand(deal.id)}
-                      className="w-full text-left px-4 pt-4 pb-3 active:bg-[#FAFAF8] transition"
+                      style={{ width: "100%", textAlign: "left", padding: "16px 16px 12px", background: "transparent", border: "none", cursor: "pointer" }}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="font-semibold text-[16px] text-[#111111] leading-snug flex-1 min-w-0">{name}</p>
-                        {amount && <span className="text-[15px] font-semibold text-[#111111] shrink-0">{amount}</span>}
+                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                        <p style={{ fontWeight: 700, fontSize: 16, color: "#0c2d48", lineHeight: 1.3, flex: 1, minWidth: 0 }}>{name}</p>
+                        {amount && <span style={{ fontSize: 15, fontWeight: 700, color: "#0c2d48", flexShrink: 0 }}>{amount}</span>}
                       </div>
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        {stage && (
-                          <span className="text-[12px] text-[#666666]">{stage}</span>
-                        )}
-                        {stage && closeDate && <span className="text-[#aaaaaa]">·</span>}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+                        {stage && <span style={{ fontSize: 12, color: "#374151" }}>{stage}</span>}
+                        {stage && closeDate && <span style={{ color: "#94a3b8" }}>·</span>}
                         {closeDate && (
-                          <span className={`text-[12px] font-medium ${isOverdue ? "text-red-600" : isSoon ? "text-amber-600" : "text-[#666666]"}`}>
+                          <span style={{ fontSize: 12, fontWeight: 500, color: isOverdue ? "#dc2626" : isSoon ? "#d97706" : "#374151" }}>
                             {isOverdue ? `Overdue ${closeDate}` : isSoon ? `Due ${closeDate}` : closeDate}
                           </span>
                         )}
                       </div>
                     </button>
 
-                    {/* Action row — always visible */}
-                    <div className="flex border-t border-[#f0f0f0]">
+                    {/* Action row */}
+                    <div style={{ display: "flex", borderTop: "1px solid #dce4ec" }}>
                       <Link
                         href={`/deals/${deal.id}/note`}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-[13px] font-semibold text-[#F97316] active:bg-[#FAFAF8] transition border-r border-[#f0f0f0]"
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                          padding: "14px 0", fontSize: 13, fontWeight: 700, color: "#1565a0",
+                          borderRight: "1px solid #dce4ec", textDecoration: "none",
+                        }}
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                         Note
                       </Link>
                       <Link
                         href={`/deals/${deal.id}/new`}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-[13px] font-semibold text-[#2563EB] active:bg-[#FAFAF8] transition"
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                          padding: "14px 0", fontSize: 13, fontWeight: 700, color: "#2e86c1",
+                          textDecoration: "none",
+                        }}
                       >
                         Log Task
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                       </Link>
@@ -251,36 +265,40 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                     {/* History toggle */}
                     <button
                       onClick={() => handleExpand(deal.id)}
-                      className="w-full flex items-center justify-between px-4 py-3 border-t border-[#e0e0e0] bg-[#eeeef0] active:bg-[#e4e4e6] transition"
+                      style={{
+                        width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "12px 16px",
+                        background: "#eaf2f8", border: "none", borderTop: "1px solid #dce4ec", cursor: "pointer",
+                      }}
                     >
-                      <span className="flex items-center gap-1.5 text-[13px] font-semibold text-[#333333]">
-                        <svg className="w-3.5 h-3.5 text-[#555555]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#0c2d48" }}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: "#374151" }}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
                         </svg>
                         Activity
                       </span>
-                      <svg className={`w-4 h-4 text-[#333333] transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg style={{ width: 16, height: 16, color: "#374151", transform: isExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
 
                     {/* Expanded panel */}
                     {isExpanded && (
-                      <div className="px-4 pt-1 pb-4 border-t border-[#f0f0f0]">
-                        <div className="flex items-start justify-between mt-3 mb-3">
-                          <dl className="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
+                      <div style={{ padding: "4px 16px 16px", borderTop: "1px solid #dce4ec" }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginTop: 12, marginBottom: 12 }}>
+                          <dl style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px 24px", flex: 1 }}>
                             {[["Amount", amount ?? "—"], ["Close Date", closeDate ?? "—"], ["Pipeline", pipeline ?? "—"], ["Stage", stage ?? "—"]].map(([label, value]) => (
                               <div key={label}>
-                                <dt className="text-[11px] font-semibold text-[#555555] uppercase tracking-wider mb-0.5">{label}</dt>
-                                <dd className="text-[14px] font-medium text-[#111111]">{value}</dd>
+                                <dt style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>{label}</dt>
+                                <dd style={{ fontSize: 14, fontWeight: 600, color: "#0c2d48" }}>{value}</dd>
                               </div>
                             ))}
                           </dl>
                           <Link
                             href={`/deals/${deal.id}/edit`}
-                            className="shrink-0 flex items-center gap-1 text-[12px] font-medium text-[#666666] border border-[#e0e0e0] rounded-lg px-2.5 py-1.5 active:bg-[#FAFAF8] transition ml-3"
+                            style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: "#374151", border: "1px solid #dce4ec", borderRadius: 8, padding: "6px 10px", textDecoration: "none", marginLeft: 12 }}
                           >
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 1 1 3.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                             Edit deal
@@ -304,7 +322,11 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
           {visibleCount < filtered.length && (
             <button
               onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-              className="w-full mt-3 py-3.5 rounded-xl border border-[#ebebeb] bg-white text-[14px] text-[#666666] font-medium active:bg-[#FAFAF8] transition"
+              style={{
+                width: "100%", marginTop: 12, padding: "14px 0", borderRadius: 12,
+                border: "1px solid #dce4ec", background: "#fff", fontSize: 14,
+                color: "#374151", fontWeight: 500, cursor: "pointer",
+              }}
             >
               Load more ({filtered.length - visibleCount} remaining)
             </button>

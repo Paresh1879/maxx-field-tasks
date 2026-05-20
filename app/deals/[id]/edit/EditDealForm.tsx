@@ -43,7 +43,7 @@ export default function EditDealForm({
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "Failed to update deal");
       }
-      router.push("/deals");
+      router.push("/deals/list");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't update the deal. Try again.");
     } finally {
@@ -51,44 +51,73 @@ export default function EditDealForm({
     }
   }
 
-  const fieldClass = "w-full bg-white border border-[#ebebeb] rounded-xl px-3.5 py-3 text-[15px] text-[#111111] placeholder-[#999999] focus:outline-none focus:border-[#F97316] transition disabled:opacity-50";
+  const fieldStyle: React.CSSProperties = {
+    width: "100%", background: "#fff", border: "1px solid #dce4ec", borderRadius: 12,
+    padding: "12px 14px", fontSize: 15, color: "#0c2d48", outline: "none",
+    boxSizing: "border-box", transition: "border-color 0.15s",
+    opacity: saving ? 0.5 : 1,
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
-        <div className="p-4 flex flex-col gap-4">
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", overflow: "hidden" }}>
+        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Deal name *</label>
-            <input type="text" className={fieldClass} value={fields.dealname} disabled={saving}
-              onChange={(e) => setFields((f) => ({ ...f, dealname: e.target.value }))} />
+            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Deal name *</label>
+            <input
+              type="text" style={fieldStyle} value={fields.dealname} disabled={saving}
+              onChange={(e) => setFields((f) => ({ ...f, dealname: e.target.value }))}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
+            />
           </div>
           <div>
-            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Amount</label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#999999]">$</span>
-              <input type="number" min="0" step="any" className={`${fieldClass} pl-7`} value={fields.amount} disabled={saving}
-                onChange={(e) => setFields((f) => ({ ...f, amount: e.target.value }))} />
+            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Amount</label>
+            <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}>$</span>
+              <input
+                type="number" min="0" step="any"
+                style={{ ...fieldStyle, paddingLeft: 28 }}
+                value={fields.amount} disabled={saving}
+                onChange={(e) => setFields((f) => ({ ...f, amount: e.target.value }))}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
+              />
             </div>
           </div>
           <div>
-            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Close date</label>
-            <input type="date" className={fieldClass} value={fields.closedate} disabled={saving}
-              onChange={(e) => setFields((f) => ({ ...f, closedate: e.target.value }))} />
+            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Close date</label>
+            <input
+              type="date" style={fieldStyle} value={fields.closedate} disabled={saving}
+              onChange={(e) => setFields((f) => ({ ...f, closedate: e.target.value }))}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
+            />
           </div>
           {pipelines.length > 0 && (
             <div>
-              <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Pipeline</label>
-              <select className={fieldClass} value={fields.pipeline} disabled={saving}
-                onChange={(e) => handlePipelineChange(e.target.value)}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Pipeline</label>
+              <select
+                style={fieldStyle} value={fields.pipeline} disabled={saving}
+                onChange={(e) => handlePipelineChange(e.target.value)}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
+              >
                 {pipelines.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
               </select>
             </div>
           )}
           {currentPipeline && currentPipeline.stages.length > 0 && (
             <div>
-              <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Stage</label>
-              <select className={fieldClass} value={fields.dealstage} disabled={saving}
-                onChange={(e) => setFields((f) => ({ ...f, dealstage: e.target.value }))}>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Stage</label>
+              <select
+                style={fieldStyle} value={fields.dealstage} disabled={saving}
+                onChange={(e) => setFields((f) => ({ ...f, dealstage: e.target.value }))}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
+              >
                 {currentPipeline.stages.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </div>
@@ -97,14 +126,30 @@ export default function EditDealForm({
       </div>
 
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
-          <p className="text-[13px] text-red-600">{error}</p>
+        <div style={{ padding: "12px 16px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 12 }}>
+          <p style={{ fontSize: 13, color: "#dc2626" }}>{error}</p>
         </div>
       )}
 
-      <button type="submit" disabled={!fields.dealname.trim() || saving}
-        className="w-full py-4 rounded-xl bg-[#F97316] text-white font-semibold text-[15px] disabled:opacity-40 active:opacity-80 transition flex items-center justify-center gap-2">
-        {saving ? <><span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />Saving…</> : "Save changes"}
+      <button
+        type="submit"
+        disabled={!fields.dealname.trim() || saving}
+        style={{
+          width: "100%", padding: "16px 0", borderRadius: 12,
+          background: "#1565a0", color: "#fff", fontWeight: 700, fontSize: 15,
+          border: "none", cursor: "pointer", display: "flex", alignItems: "center",
+          justifyContent: "center", gap: 8, transition: "opacity 0.15s",
+          opacity: (!fields.dealname.trim() || saving) ? 0.4 : 1,
+        }}
+      >
+        {saving ? (
+          <>
+            <span style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
+            Saving…
+          </>
+        ) : (
+          "Save changes"
+        )}
       </button>
     </form>
   );

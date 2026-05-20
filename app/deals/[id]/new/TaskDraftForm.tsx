@@ -78,22 +78,28 @@ export default function TaskDraftForm({
     setSubmitting(false);
   }
 
-  const fieldClass = "w-full bg-white border border-[#ebebeb] rounded-xl px-3.5 py-3 text-[15px] text-[#111111] placeholder-[#999999] focus:outline-none focus:border-[#F97316] transition disabled:opacity-50";
+  const fieldStyle: React.CSSProperties = {
+    width: "100%", background: "#fff", border: "1px solid #dce4ec", borderRadius: 12,
+    padding: "12px 14px", fontSize: 15, color: "#0c2d48", outline: "none",
+    boxSizing: "border-box", transition: "border-color 0.15s",
+    opacity: submitting ? 0.5 : 1,
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {/* Note */}
-      <div className="bg-white rounded-xl border border-[#ebebeb] px-4 py-3">
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", padding: "16px" }}>
         <textarea
-          className="w-full text-[15px] text-[#111111] placeholder-[#999999] resize-none focus:outline-none disabled:opacity-50 bg-transparent"
+          style={{ width: "100%", fontSize: 15, color: "#0c2d48", resize: "none", outline: "none", background: "transparent", border: "none", opacity: submitting ? 0.5 : 1, boxSizing: "border-box" }}
           rows={5}
           placeholder={`What happened with ${dealName}?`}
           value={note}
           disabled={submitting}
           onChange={(e) => setNote(e.target.value)}
         />
-        <div className="flex items-center justify-between pt-2 border-t border-[#f0f0f0]">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #dce4ec", marginTop: 4 }}>
           <VoiceRecorder
             disabled={submitting || suggesting}
             onTranscript={(t) => setNote((prev) => prev ? `${prev} ${t}` : t)}
@@ -102,16 +108,20 @@ export default function TaskDraftForm({
             type="button"
             onClick={handleSuggest}
             disabled={!note.trim() || suggesting || submitting}
-            className="flex items-center gap-1.5 text-[13px] font-semibold text-[#111111] disabled:opacity-30 active:opacity-60 transition"
+            style={{
+              display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700,
+              color: "#0c2d48", background: "none", border: "none", cursor: "pointer",
+              opacity: (!note.trim() || suggesting || submitting) ? 0.3 : 1, transition: "opacity 0.15s",
+            }}
           >
             {suggesting ? (
               <>
-                <span className="w-3.5 h-3.5 rounded-full border-2 border-[#ebebeb] border-t-[#111] animate-spin" />
+                <span style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid #dce4ec", borderTopColor: "#0c2d48", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
                 Thinking…
               </>
             ) : (
               <>
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74L12 2z" />
                 </svg>
                 Draft Task
@@ -122,51 +132,58 @@ export default function TaskDraftForm({
       </div>
 
       {/* Task fields */}
-      <div className="bg-white rounded-xl border border-[#ebebeb] overflow-hidden">
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", overflow: "hidden" }}>
         {suggested && (
-          <div className="px-4 py-2.5 bg-[#FAFAF8] border-b border-[#ebebeb]">
-            <p className="text-[12px] text-[#666666]">AI suggestion — review before saving</p>
+          <div style={{ padding: "10px 16px", background: "#eaf2f8", borderBottom: "1px solid #dce4ec" }}>
+            <p style={{ fontSize: 12, color: "#374151" }}>AI suggestion — review before saving</p>
           </div>
         )}
 
-        <div className="p-4 flex flex-col gap-4">
+        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Task title</label>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Task title</label>
             <input
               type="text"
-              className={fieldClass}
+              style={fieldStyle}
               placeholder="e.g. Send follow-up quote"
               value={fields.title}
               disabled={submitting}
               onChange={(e) => setFields((f) => ({ ...f, title: e.target.value }))}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Due date</label>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Due date</label>
             <input
               type="date"
-              className={fieldClass}
+              style={fieldStyle}
               value={fields.due_date}
               disabled={submitting}
               onChange={(e) => setFields((f) => ({ ...f, due_date: e.target.value }))}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Priority</label>
-            <div className="flex gap-2">
+            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Priority</label>
+            <div style={{ display: "flex", gap: 8 }}>
               {(["LOW", "MEDIUM", "HIGH"] as Priority[]).map((p) => (
                 <button
                   key={p}
                   type="button"
                   disabled={submitting}
                   onClick={() => setFields((f) => ({ ...f, priority: p }))}
-                  className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold border transition disabled:opacity-40 ${
-                    fields.priority === p
-                      ? "bg-[#111111] text-white border-[#111111]"
-                      : "bg-white text-[#666666] border-[#ebebeb] active:bg-[#FAFAF8]"
-                  }`}
+                  style={{
+                    flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 13, fontWeight: 700,
+                    border: "1px solid", cursor: "pointer", transition: "all 0.15s",
+                    opacity: submitting ? 0.4 : 1,
+                    background: fields.priority === p ? "#1565a0" : "#fff",
+                    color: fields.priority === p ? "#fff" : "#374151",
+                    borderColor: fields.priority === p ? "#1565a0" : "#dce4ec",
+                  }}
                 >
                   {p.charAt(0) + p.slice(1).toLowerCase()}
                 </button>
@@ -176,12 +193,14 @@ export default function TaskDraftForm({
 
           {owners.length > 0 && (
             <div>
-              <label className="block text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-1.5">Owner</label>
+              <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Owner</label>
               <select
-                className={fieldClass}
+                style={fieldStyle}
                 value={fields.owner_id}
                 disabled={submitting}
                 onChange={(e) => setFields((f) => ({ ...f, owner_id: e.target.value }))}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "#1565a0"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "#dce4ec"; }}
               >
                 <option value="">Unassigned</option>
                 {owners.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
@@ -192,19 +211,25 @@ export default function TaskDraftForm({
       </div>
 
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
-          <p className="text-[13px] text-red-600">{error}</p>
+        <div style={{ padding: "12px 16px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 12 }}>
+          <p style={{ fontSize: 13, color: "#dc2626" }}>{error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={!fields.title.trim() || submitting || suggesting}
-        className="w-full py-4 rounded-xl bg-[#F97316] text-white font-semibold text-[15px] disabled:opacity-40 active:opacity-80 transition flex items-center justify-center gap-2"
+        style={{
+          width: "100%", padding: "16px 0", borderRadius: 12,
+          background: "#1565a0", color: "#fff", fontWeight: 700, fontSize: 15,
+          border: "none", cursor: "pointer", display: "flex", alignItems: "center",
+          justifyContent: "center", gap: 8, transition: "opacity 0.15s",
+          opacity: (!fields.title.trim() || submitting || suggesting) ? 0.4 : 1,
+        }}
       >
         {submitting ? (
           <>
-            <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            <span style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
             Saving…
           </>
         ) : (

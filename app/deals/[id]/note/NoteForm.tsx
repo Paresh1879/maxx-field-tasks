@@ -37,34 +37,45 @@ export default function NoteForm({ dealId, dealName }: { dealId: string; dealNam
 
   if (state === "done") {
     return (
-      <div className="bg-white rounded-xl border border-[#ebebeb] px-6 py-10 text-center">
-        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-          <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", padding: "40px 24px", textAlign: "center" }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: "50%", background: "#dcfce7",
+          display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px",
+        }}>
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#16a34a" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <p className="text-[17px] font-semibold text-[#111111] mb-1">Note saved</p>
-        <p className="text-[13px] text-[#999999] mb-6">Added to {dealName} in HubSpot.</p>
-        <div className="flex flex-col gap-2.5">
+        <p style={{ fontSize: 18, fontWeight: 700, color: "#0c2d48", marginBottom: 4 }}>Note saved</p>
+        <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 24 }}>Added to {dealName} in HubSpot.</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {dealUrl && (
             <a
               href={dealUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3.5 rounded-xl bg-[#F97316] text-white font-semibold text-[15px] text-center active:opacity-80 transition"
+              style={{
+                display: "block", padding: "14px 0", borderRadius: 12,
+                background: "#1565a0", color: "#fff", fontWeight: 700, fontSize: 15,
+                textAlign: "center", textDecoration: "none",
+              }}
             >
               View in HubSpot
             </a>
           )}
           <button
             onClick={() => { setBody(""); setDealUrl(null); setState("idle"); setError(null); }}
-            className="w-full py-3.5 rounded-xl border border-[#ebebeb] text-[#111111] font-medium text-[15px] active:bg-[#FAFAF8] transition"
+            style={{
+              width: "100%", padding: "14px 0", borderRadius: 12,
+              border: "1px solid #dce4ec", background: "#fff",
+              color: "#0c2d48", fontWeight: 600, fontSize: 15, cursor: "pointer",
+            }}
           >
             Add another note
           </button>
           <button
-            onClick={() => router.push("/deals")}
-            className="text-[13px] text-[#999999] py-2 active:text-[#666666] transition"
+            onClick={() => router.push("/deals/list")}
+            style={{ fontSize: 13, color: "#6b7280", padding: "8px 0", background: "none", border: "none", cursor: "pointer" }}
           >
             Back to My Deals
           </button>
@@ -74,17 +85,19 @@ export default function NoteForm({ dealId, dealName }: { dealId: string; dealNam
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="bg-white rounded-xl border border-[#ebebeb] px-4 py-3">
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", padding: "16px" }}>
         <textarea
-          className="w-full text-[15px] text-[#111111] placeholder-[#999999] resize-none focus:outline-none disabled:opacity-50 bg-transparent"
+          style={{ width: "100%", fontSize: 15, color: "#0c2d48", resize: "none", outline: "none", background: "transparent", border: "none", opacity: state === "submitting" ? 0.5 : 1, boxSizing: "border-box" }}
           rows={7}
           placeholder={`Notes about ${dealName}…`}
           value={body}
           disabled={state === "submitting"}
           onChange={(e) => setBody(e.target.value)}
         />
-        <div className="pt-2 border-t border-[#f0f0f0]">
+        <div style={{ paddingTop: 12, borderTop: "1px solid #dce4ec", marginTop: 4 }}>
           <VoiceRecorder
             disabled={state === "submitting"}
             onTranscript={(t) => setBody((prev) => prev ? `${prev} ${t}` : t)}
@@ -93,19 +106,25 @@ export default function NoteForm({ dealId, dealName }: { dealId: string; dealNam
       </div>
 
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
-          <p className="text-[13px] text-red-600">{error}</p>
+        <div style={{ padding: "12px 16px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 12 }}>
+          <p style={{ fontSize: 13, color: "#dc2626" }}>{error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={!body.trim() || state === "submitting"}
-        className="w-full py-4 rounded-xl bg-[#F97316] text-white font-semibold text-[15px] disabled:opacity-40 active:opacity-80 transition flex items-center justify-center gap-2"
+        style={{
+          width: "100%", padding: "16px 0", borderRadius: 12,
+          background: "#1565a0", color: "#fff", fontWeight: 700, fontSize: 15,
+          border: "none", cursor: "pointer", display: "flex", alignItems: "center",
+          justifyContent: "center", gap: 8, transition: "opacity 0.15s",
+          opacity: (!body.trim() || state === "submitting") ? 0.4 : 1,
+        }}
       >
         {state === "submitting" ? (
           <>
-            <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            <span style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
             Saving…
           </>
         ) : (

@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function EditNotePage() {
   const router = useRouter();
   const params = useParams<{ id: string; noteId: string }>();
-  const { id: dealId, noteId } = params;
+  const { noteId } = params;
 
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ export default function EditNotePage() {
       });
       if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Failed to update note");
-      router.push("/deals");
+      router.push("/deals/list");
     } catch {
       setError("Couldn't update the note. Try again.");
     } finally {
@@ -43,29 +43,40 @@ export default function EditNotePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
-      <div className="bg-white border-b border-[#ebebeb]">
+    <div className="min-h-screen" style={{ background: "#f4f8fb" }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+      {/* Gradient header */}
+      <div style={{ background: "linear-gradient(150deg, #0c2d48 0%, #1565a0 60%, #2e86c1 100%)" }}>
         <div className="max-w-lg mx-auto px-4 py-4">
-          <Link href="/deals" className="flex items-center gap-1 text-[13px] text-[#666666] active:text-[#111111] transition mb-4">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <Link
+            href="/deals/list"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.8)",
+              background: "rgba(255,255,255,0.12)", borderRadius: 8,
+              padding: "6px 12px", textDecoration: "none", marginBottom: 14,
+            }}
+          >
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
             My Deals
           </Link>
-          <h1 className="text-[18px] font-semibold text-[#111111]">Edit Note</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: -0.3 }}>Edit Note</h1>
         </div>
       </div>
 
       <div className="max-w-lg mx-auto px-4 pt-5 pb-12">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-5 h-5 rounded-full border-2 border-[#ebebeb] border-t-[#F97316] animate-spin" />
+          <div style={{ display: "flex", justifyContent: "center", padding: "48px 0" }}>
+            <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2.5px solid #d1d5db", borderTopColor: "#1565a0", animation: "spin 0.7s linear infinite" }} />
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <div className="bg-white rounded-xl border border-[#ebebeb] px-4 py-3">
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", padding: "16px" }}>
               <textarea
-                className="w-full text-[15px] text-[#111111] placeholder-[#999999] resize-none focus:outline-none bg-transparent"
+                style={{ width: "100%", fontSize: 15, color: "#0c2d48", resize: "none", outline: "none", background: "transparent", border: "none", opacity: saving ? 0.5 : 1, boxSizing: "border-box" }}
                 rows={8}
                 value={body}
                 disabled={saving}
@@ -74,14 +85,24 @@ export default function EditNotePage() {
             </div>
 
             {error && (
-              <div className="px-4 py-3 bg-red-50 border border-red-100 rounded-xl">
-                <p className="text-[13px] text-red-600">{error}</p>
+              <div style={{ padding: "12px 16px", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 12 }}>
+                <p style={{ fontSize: 13, color: "#dc2626" }}>{error}</p>
               </div>
             )}
 
-            <button type="submit" disabled={!body.trim() || saving}
-              className="w-full py-4 rounded-xl bg-[#F97316] text-white font-semibold text-[15px] disabled:opacity-40 active:opacity-80 transition flex items-center justify-center gap-2">
-              {saving ? <><span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />Saving…</> : "Save changes"}
+            <button
+              type="submit" disabled={!body.trim() || saving}
+              style={{
+                width: "100%", padding: "16px 0", borderRadius: 12,
+                background: "#1565a0", color: "#fff", fontWeight: 700, fontSize: 15,
+                border: "none", cursor: "pointer", display: "flex", alignItems: "center",
+                justifyContent: "center", gap: 8, transition: "opacity 0.15s",
+                opacity: (!body.trim() || saving) ? 0.4 : 1,
+              }}
+            >
+              {saving
+                ? <><span style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", display: "inline-block", animation: "spin 0.7s linear infinite" }} />Saving…</>
+                : "Save changes"}
             </button>
           </form>
         )}
