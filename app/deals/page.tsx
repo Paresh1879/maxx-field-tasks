@@ -170,8 +170,23 @@ export default async function DashboardPage() {
 
       <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 16px 48px" }}>
 
-        {/* Sign out */}
-        <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 16, position: "relative" }}>
+        {/* Top bar */}
+        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, paddingTop: 16, position: "relative" }}>
+          <Link href="/help" style={{
+            background: "#fff", border: "1px solid #dce4ec", borderRadius: 10,
+            color: "#6b7280", padding: "7px 14px", cursor: "pointer",
+            fontFamily: "inherit", fontSize: 13, fontWeight: 600,
+            display: "flex", alignItems: "center", gap: 6,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            textDecoration: "none",
+          }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Help
+          </Link>
           <form action="/api/auth/logout" method="POST">
             <button type="submit" style={{
               background: "#fff", border: "1px solid #dce4ec", borderRadius: 10,
@@ -238,8 +253,58 @@ export default async function DashboardPage() {
         </div>
 
         {/* Footer */}
-        <footer style={{ marginTop: 48, paddingTop: 20, borderTop: "1px solid #dce4ec", textAlign: "center", position: "relative" }}>
-          <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.8 }}>
+        <footer style={{ marginTop: 48, paddingTop: 20, borderTop: "1px solid #dce4ec" }}>
+
+          {/* What's New — collapsible */}
+          <style>{`
+            details.wnew summary { list-style: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+            details.wnew summary::-webkit-details-marker { display: none; }
+            details.wnew[open] .wnew-chevron { transform: rotate(180deg); }
+            .wnew-chevron { transition: transform 0.2s; display: inline-block; }
+          `}</style>
+          <details className="wnew" style={{ marginBottom: 20 }}>
+            <summary style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "6px 0", userSelect: "none" }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#374151" }}>🆕 What&apos;s New</span>
+              <svg className="wnew-chevron" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </summary>
+
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+              {([
+                { v: "v2.1", date: "May 2026", latest: true, items: ["Urgent items banner — overdue & due-this-week at a glance", "All Deals page with team pipeline, owner names & sort by close date", "Help page with tool guides and query examples", "Title case for deal and owner names"] },
+                { v: "v2.0", date: "May 2026", items: ["Full surgeon intelligence platform — 9 tools on one dashboard", "Blue navy redesign: Outfit font, gradient headers, card grid", "NPI Lookup, Open Payments, Volume Intelligence, Target Lists", "Surgeon Profile, Networks, Comparison launched", "Surgeons page: HubSpot contacts filtered to medical professionals", "Supabase integration for volume and industry payments"] },
+                { v: "v3.5", date: "May 2026", items: ["ASC Research: surgeon names clickable → Volume Intelligence", "Opportunity indicator on ASCs with known surgeons"] },
+                { v: "v3.4", date: "May 2026", items: ["20+ new Volume Intelligence query patterns", "15 new Open Payments patterns", "ASC database expanded to 539 centers across 43 states"] },
+                { v: "v3.3–v3.1", date: "May 2026", items: ["Networks, Comparison, Target Lists launched", "NPI Lookup broadened to podiatrists and trauma specialists", "Help guide with real query examples for every tool"] },
+                { v: "v1.2", date: "May 2026", items: ["Notes and voice recorder for field meetings", "Deal creation and editing from phone"] },
+                { v: "v1.0–1.1", date: "May 2026", items: ["Initial release: HubSpot OAuth, deals list, AI task creation", "Activity history, search, token auto-refresh"] },
+              ] as { v: string; date: string; latest?: boolean; items: string[] }[]).map((r, i, arr) => (
+                <div key={r.v} style={{
+                  background: "#fff", borderRadius: 10, border: "1px solid #dce4ec",
+                  padding: "12px 14px",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 5,
+                      background: r.latest ? "#1565a0" : "#eaf2f8",
+                      color: r.latest ? "#fff" : "#0c2d48", letterSpacing: 0.3,
+                    }}>{r.v}</span>
+                    {r.latest && <span style={{ fontSize: 10, fontWeight: 700, color: "#16a34a", background: "#dcfce7", padding: "2px 6px", borderRadius: 4 }}>LATEST</span>}
+                    <span style={{ fontSize: 11, color: "#94a3b8" }}>{r.date}</span>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 16, display: "flex", flexDirection: "column", gap: 3 }}>
+                    {r.items.map((item, j) => (
+                      <li key={j} style={{ fontSize: 12, color: "#374151", lineHeight: 1.6 }}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </details>
+
+          {/* Copyright + Privacy */}
+          <div style={{ textAlign: "center" }}>
             <div style={{ fontWeight: 700, color: "#0c2d48", fontSize: 14 }}>Maxx HubApp</div>
             <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>© 2026 Maxx Orthopedics. All rights reserved.</div>
             <div style={{ marginTop: 8 }}>
