@@ -7,6 +7,11 @@ import type { DealHistory, HistoryActivity, HistoryContact } from "@/app/api/dea
 
 type HistoryState = DealHistory | "loading" | "error";
 
+function toTitleCase(s?: string): string {
+  if (!s) return "";
+  return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function formatCurrency(amount?: string) {
   if (!amount) return null;
   const n = parseFloat(amount);
@@ -137,12 +142,36 @@ export default function AllDealsClient({ deals }: { deals: AllDeal[] }) {
   }, [expandedId, fetchHistory]);
 
   const filtered = useMemo(() => {
+    const now = Date.now();
     const q = search.trim().toLowerCase();
-    return deals.filter((d) => {
-      const nameMatch = !q || (d.properties.dealname ?? "").toLowerCase().includes(q) || (d.properties.ownerName ?? "").toLowerCase().includes(q);
-      const ownerMatch = !ownerFilter || d.properties.ownerName === ownerFilter;
-      return nameMatch && ownerMatch;
-    });
+
+    const toMs = (dateStr?: string): number | null => {
+      if (!dateStr) return null;
+      const d = /^\d+$/.test(dateStr) ? new Date(Number(dateStr)) : new Date(dateStr);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    };
+
+    return deals
+      .filter((d) => {
+        const nameMatch = !q || (d.properties.dealname ?? "").toLowerCase().includes(q) || (d.properties.ownerName ?? "").toLowerCase().includes(q);
+        const ownerMatch = !ownerFilter || d.properties.ownerName === ownerFilter;
+        return nameMatch && ownerMatch;
+      })
+      .sort((a, b) => {
+        const aMs = toMs(a.properties.closedate);
+        const bMs = toMs(b.properties.closedate);
+        // No date → push to bottom
+        if (aMs === null && bMs === null) return 0;
+        if (aMs === null) return 1;
+        if (bMs === null) return -1;
+        const aOverdue = aMs < now;
+        const bOverdue = bMs < now;
+        // Overdue before upcoming
+        if (aOverdue && !bOverdue) return -1;
+        if (!aOverdue && bOverdue) return 1;
+        // Within same group: earliest date first
+        return aMs - bMs;
+      });
   }, [deals, search, ownerFilter]);
 
   return (
@@ -166,7 +195,7 @@ export default function AllDealsClient({ deals }: { deals: AllDeal[] }) {
           <select value={ownerFilter} onChange={(e) => { setOwnerFilter(e.target.value); setVisibleCount(PAGE_SIZE); }}
             style={{ background: "#fff", border: "1px solid #dce4ec", borderRadius: 12, padding: "0 12px", fontSize: 13, color: "#0c2d48", outline: "none", cursor: "pointer", flexShrink: 0 }}>
             <option value="">All owners</option>
-            {owners.map((o) => <option key={o} value={o}>{o}</option>)}
+            {owners.map((o) => <option key={o} value={o}>{toTitleCase(o)}</option>)}
           </select>
         )}
       </div>
@@ -177,7 +206,7 @@ export default function AllDealsClient({ deals }: { deals: AllDeal[] }) {
         <>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             {filtered.slice(0, visibleCount).map((deal) => {
-              const name = deal.properties.dealname ?? "Unnamed Deal";
+              const name = toTitleCase(deal.properties.dealname) || "Unnamed Deal";
               const amount = formatCurrency(deal.properties.amount);
               const closeDate = formatDate(deal.properties.closedate);
               const stage = deal.properties.dealstage;
@@ -199,7 +228,7 @@ export default function AllDealsClient({ deals }: { deals: AllDeal[] }) {
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
                         {/* Owner badge */}
                         <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "#f3e5f5", color: "#7b1fa2" }}>
-                          {deal.properties.ownerName || "Unassigned"}
+                          {toTitleCase(deal.properties.ownerName) || "Unassigned"}
                         </span>
                         {stage && <span style={{ fontSize: 12, color: "#374151" }}>{stage}</span>}
                         {closeDate && (

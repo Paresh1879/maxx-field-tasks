@@ -109,15 +109,6 @@ export default function UrgentItems() {
             {total} item{total !== 1 ? "s" : ""} need attention
           </span>
         </div>
-        <Link href="/deals/list" style={{
-          fontSize: 12, fontWeight: 600, color: "#1565a0",
-          textDecoration: "none", display: "flex", alignItems: "center", gap: 3,
-        }}>
-          View all
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </Link>
       </div>
 
       {/* Body */}
