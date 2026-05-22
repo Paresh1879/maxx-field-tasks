@@ -68,7 +68,10 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
   const empty = contacts.length === 0 && activities.length === 0;
 
   const typeColors: Record<HistoryActivity["type"], string> = {
-    task: "#7b1fa2", call: "#0891b2", email: "#1565a0", note: "#2e7d32",
+    task: "#7b1fa2", call: "#0891b2", email: "#1565a0", note: "#ea580c",
+  };
+  const typeBgs: Record<HistoryActivity["type"], string> = {
+    task: "#f5f0f9", call: "#f0f9ff", email: "#eaf2f8", note: "#fff7ed",
   };
 
   return (
@@ -97,8 +100,8 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
           <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>Recent Activity</p>
           <ul className="space-y-3">
             {activities.map((a: HistoryActivity) => (
-              <li key={a.id} className="flex gap-2.5">
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#0c2d48", flexShrink: 0, marginTop: 6 }} />
+              <li key={`${a.type}-${a.id}`} style={{ background: typeBgs[a.type], borderRadius: 10, padding: "8px 10px", display: "flex", gap: 10 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: typeColors[a.type], flexShrink: 0, marginTop: 5 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="flex items-center gap-2 mb-0.5">
                     <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, color: typeColors[a.type] }}>{a.type}</span>
@@ -246,7 +249,7 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         href={`/deals/${deal.id}/note`}
                         style={{
                           flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                          padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#2e7d32",
+                          padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#ea580c",
                           borderRight: "1px solid #dce4ec", textDecoration: "none",
                           background: "transparent",
                         }}

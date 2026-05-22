@@ -87,13 +87,17 @@ export async function POST(request: Request) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { note, dealId } = await request.json();
+  const { note, dealId, clientToday } = await request.json();
 
   if (!note?.trim()) {
     return Response.json({ error: "Note is required" }, { status: 400 });
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  // Use the client's local date so "tomorrow" is correct in the user's timezone,
+  // not UTC (which can be the next calendar day for US evening users).
+  const today = clientToday && /^\d{4}-\d{2}-\d{2}$/.test(clientToday)
+    ? clientToday
+    : new Date().toISOString().split("T")[0];
 
   let response;
   try {

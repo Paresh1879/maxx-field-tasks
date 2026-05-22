@@ -15,7 +15,10 @@ function formatTimestamp(ts: number): string {
 }
 
 const typeColors: Record<HistoryActivity["type"], string> = {
-  task: "text-[#2563EB]", call: "text-green-700", email: "text-violet-700", note: "text-[#F97316]",
+  task: "#7b1fa2", call: "#0891b2", email: "#1565a0", note: "#ea580c",
+};
+const typeBgs: Record<HistoryActivity["type"], string> = {
+  task: "#f5f0f9", call: "#f0f9ff", email: "#eaf2f8", note: "#fff7ed",
 };
 
 export default function ActivityPanel({ dealId }: { dealId: string }) {
@@ -68,15 +71,15 @@ export default function ActivityPanel({ dealId }: { dealId: string }) {
         <div>
           <ul className="space-y-3">
             {activities.map((a) => (
-              <li key={a.id} className="flex gap-2.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#888888] shrink-0 mt-1.5" />
+              <li key={`${a.type}-${a.id}`} style={{ background: typeBgs[a.type], borderRadius: 10, padding: "8px 10px", display: "flex", gap: 10 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: typeColors[a.type], flexShrink: 0, marginTop: 5 }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`text-[11px] font-semibold uppercase tracking-wide ${typeColors[a.type]}`}>{a.type}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: typeColors[a.type] }}>{a.type}</span>
                     <span className="text-[11px] text-[#888888]">{formatTimestamp(a.timestamp)}</span>
                     {(a.type === "note" || a.type === "task") && (
                       <Link
-                        href={a.type === "note" ? `/deals/${dealId}/note/${a.id}/edit` : `/deals/${dealId}/task/${a.id}/edit`}
+                        href={a.type === "note" ? `/deals/${dealId}/note/${a.id}/edit?from=deal` : `/deals/${dealId}/task/${a.id}/edit?from=deal`}
                         className="ml-auto text-[11px] font-medium text-[#999999] border border-[#e0e0e0] rounded-md px-1.5 py-0.5 active:bg-[#FAFAF8] transition"
                       >
                         Edit

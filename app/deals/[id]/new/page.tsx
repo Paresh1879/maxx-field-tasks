@@ -23,8 +23,17 @@ async function getPageData(dealId: string): Promise<{ dealName: string; owners: 
   return { dealName, owners, currentOwnerId: currentOwner ? String(currentOwner.id) : "" };
 }
 
-export default async function NewTaskPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function NewTaskPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
+}) {
   const { id } = await params;
+  const { from } = await searchParams;
+  const backHref = from === "all" ? "/deals/all" : "/deals/list";
+  const backLabel = from === "all" ? "All Deals" : "My Deals";
   let dealName = "this deal";
   let owners: Owner[] = [];
   let currentOwnerId = "";
@@ -42,7 +51,7 @@ export default async function NewTaskPage({ params }: { params: Promise<{ id: st
       <div style={{ background: "linear-gradient(150deg, #0c2d48 0%, #1565a0 60%, #2e86c1 100%)" }}>
         <div className="max-w-lg mx-auto px-4 py-4">
           <Link
-            href="/deals/list"
+            href={backHref}
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.8)",
@@ -53,7 +62,7 @@ export default async function NewTaskPage({ params }: { params: Promise<{ id: st
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            My Deals
+            {backLabel}
           </Link>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff", lineHeight: 1.2, letterSpacing: -0.3 }}>{dealName}</h1>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>Describe what happened — AI will draft the task.</p>
@@ -61,7 +70,7 @@ export default async function NewTaskPage({ params }: { params: Promise<{ id: st
       </div>
 
       <div className="max-w-lg mx-auto px-4 pt-5 pb-6">
-        <TaskDraftForm dealId={id} dealName={dealName} owners={owners} currentOwnerId={currentOwnerId} />
+        <TaskDraftForm dealId={id} dealName={dealName} owners={owners} currentOwnerId={currentOwnerId} from={from} />
       </div>
 
       <div className="max-w-lg mx-auto px-4 pb-12">

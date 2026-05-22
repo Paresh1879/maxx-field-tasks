@@ -19,11 +19,13 @@ export default function TaskDraftForm({
   dealName,
   owners,
   currentOwnerId,
+  from,
 }: {
   dealId: string;
   dealName: string;
   owners: Owner[];
   currentOwnerId: string;
+  from?: string;
 }) {
   const router = useRouter();
   const [note, setNote] = useState("");
@@ -42,7 +44,7 @@ export default function TaskDraftForm({
       const res = await fetch("/api/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ note, dealId }),
+        body: JSON.stringify({ note, dealId, clientToday: new Date().toLocaleDateString("en-CA") }),
       });
       if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Suggestion failed");
@@ -70,7 +72,9 @@ export default function TaskDraftForm({
       if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Task creation failed");
       const data = await res.json();
-      router.push(`/deals/${dealId}/done?taskId=${data.taskId}&taskUrl=${encodeURIComponent(data.taskUrl)}`);
+      const qs = new URLSearchParams({ taskId: data.taskId, taskUrl: data.taskUrl });
+      if (from) qs.set("from", from);
+      router.push(`/deals/${dealId}/done?${qs}`);
       return;
     } catch {
       setError("Couldn't save the task. Check your connection and try again.");

@@ -56,7 +56,8 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
   }
 
   const { contacts, activities } = history;
-  const typeColors: Record<HistoryActivity["type"], string> = { task: "#1565a0", call: "#2e7d32", email: "#7b1fa2", note: "#2e86c1" };
+  const typeColors: Record<HistoryActivity["type"], string> = { task: "#7b1fa2", call: "#0891b2", email: "#1565a0", note: "#ea580c" };
+  const typeBgs: Record<HistoryActivity["type"], string> = { task: "#f5f0f9", call: "#f0f9ff", email: "#eaf2f8", note: "#fff7ed" };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -83,8 +84,8 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
           <p style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>Recent Activity</p>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
             {activities.map((a: HistoryActivity) => (
-              <li key={a.id} style={{ display: "flex", gap: 10 }}>
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#0c2d48", flexShrink: 0, marginTop: 6 }} />
+              <li key={`${a.type}-${a.id}`} style={{ background: typeBgs[a.type], borderRadius: 10, padding: "8px 10px", display: "flex", gap: 10 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: typeColors[a.type], flexShrink: 0, marginTop: 5 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: typeColors[a.type] }}>{a.type}</span>
@@ -241,12 +242,12 @@ export default function AllDealsClient({ deals }: { deals: AllDeal[] }) {
 
                     {/* Actions */}
                     <div style={{ display: "flex", borderTop: "1px solid #dce4ec" }}>
-                      <Link href={`/deals/${deal.id}/note`}
-                        style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#1565a0", borderRight: "1px solid #dce4ec", textDecoration: "none" }}>
+                      <Link href={`/deals/${deal.id}/note?from=all`}
+                        style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#ea580c", borderRight: "1px solid #dce4ec", textDecoration: "none" }}>
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         Note
                       </Link>
-                      <Link href={`/deals/${deal.id}/new`}
+                      <Link href={`/deals/${deal.id}/new?from=all`}
                         style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#7b1fa2", textDecoration: "none" }}>
                         Log Task
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>

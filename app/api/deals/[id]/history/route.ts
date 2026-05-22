@@ -129,7 +129,15 @@ export async function GET(
     }
   }
 
-  activities.sort((a, b) => b.timestamp - a.timestamp);
+  // Deduplicate: engagements API and CRM tasks API both return the same tasks.
+  const seen = new Set<string>();
+  const unique = activities.filter((a) => {
+    const k = `${a.type}-${a.id}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  unique.sort((a, b) => b.timestamp - a.timestamp);
 
   const contacts: HistoryContact[] = [];
 
@@ -150,5 +158,5 @@ export async function GET(
     }
   }
 
-  return Response.json({ contacts, activities } satisfies DealHistory);
+  return Response.json({ contacts, activities: unique } satisfies DealHistory);
 }

@@ -4,14 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import VoiceRecorder from "../new/VoiceRecorder";
 
-type State = "idle" | "submitting" | "done";
+type State = "idle" | "submitting";
 
-export default function NoteForm({ dealId, dealName }: { dealId: string; dealName: string }) {
+export default function NoteForm({ dealId, dealName, from }: { dealId: string; dealName: string; from?: string }) {
   const router = useRouter();
   const [body, setBody] = useState("");
   const [state, setState] = useState<State>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [dealUrl, setDealUrl] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,61 +26,15 @@ export default function NoteForm({ dealId, dealName }: { dealId: string; dealNam
       if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Save failed");
       const data = await res.json();
-      setDealUrl(data.dealUrl ?? null);
-      setState("done");
+      const params = new URLSearchParams();
+      if (data.dealUrl) params.set("dealUrl", data.dealUrl);
+      if (from) params.set("from", from);
+      const dest = `/deals/${dealId}/note/done${params.size ? `?${params}` : ""}`;
+      router.push(dest);
     } catch {
       setError("Couldn't save the note. Check your connection and try again.");
       setState("idle");
     }
-  }
-
-  if (state === "done") {
-    return (
-      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", padding: "40px 24px", textAlign: "center" }}>
-        <div style={{
-          width: 48, height: 48, borderRadius: "50%", background: "#dcfce7",
-          display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px",
-        }}>
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#16a34a" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <p style={{ fontSize: 18, fontWeight: 700, color: "#0c2d48", marginBottom: 4 }}>Note saved</p>
-        <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 24 }}>Added to {dealName} in HubSpot.</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {dealUrl && (
-            <a
-              href={dealUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "block", padding: "14px 0", borderRadius: 12,
-                background: "#1565a0", color: "#fff", fontWeight: 700, fontSize: 15,
-                textAlign: "center", textDecoration: "none",
-              }}
-            >
-              View in HubSpot
-            </a>
-          )}
-          <button
-            onClick={() => { setBody(""); setDealUrl(null); setState("idle"); setError(null); }}
-            style={{
-              width: "100%", padding: "14px 0", borderRadius: 12,
-              border: "1px solid #dce4ec", background: "#fff",
-              color: "#0c2d48", fontWeight: 600, fontSize: 15, cursor: "pointer",
-            }}
-          >
-            Add another note
-          </button>
-          <button
-            onClick={() => router.push("/deals/list")}
-            style={{ fontSize: 13, color: "#6b7280", padding: "8px 0", background: "none", border: "none", cursor: "pointer" }}
-          >
-            Back to My Deals
-          </button>
-        </div>
-      </div>
-    );
   }
 
   return (

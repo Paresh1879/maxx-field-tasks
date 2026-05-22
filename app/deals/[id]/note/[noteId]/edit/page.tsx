@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function EditNotePage() {
   const router = useRouter();
   const params = useParams<{ id: string; noteId: string }>();
-  const { noteId } = params;
+  const searchParams = useSearchParams();
+  const { id: dealId, noteId } = params;
+  const from = searchParams.get("from");
+  const backHref = from === "all" ? "/deals/all" : from === "deal" ? `/deals/${dealId}/new` : "/deals/list";
+  const backLabel = from === "all" ? "All Deals" : from === "deal" ? "Back to Deal" : "My Deals";
 
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,7 +38,7 @@ export default function EditNotePage() {
       });
       if (res.status === 401) { router.push("/login"); return; }
       if (!res.ok) throw new Error("Failed to update note");
-      router.push("/deals/list");
+      router.push(backHref);
     } catch {
       setError("Couldn't update the note. Try again.");
     } finally {
@@ -50,7 +54,7 @@ export default function EditNotePage() {
       <div style={{ background: "linear-gradient(150deg, #0c2d48 0%, #1565a0 60%, #2e86c1 100%)" }}>
         <div className="max-w-lg mx-auto px-4 py-4">
           <Link
-            href="/deals/list"
+            href={backHref}
             style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.8)",
@@ -61,7 +65,7 @@ export default function EditNotePage() {
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            My Deals
+            {backLabel}
           </Link>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: -0.3 }}>Edit Note</h1>
         </div>

@@ -1,18 +1,18 @@
 import Link from "next/link";
 
-export default async function DonePage({
+export default async function NoteDonePage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ taskId?: string; taskUrl?: string; from?: string }>;
+  searchParams: Promise<{ dealUrl?: string; from?: string }>;
 }) {
   const { id } = await params;
-  const { taskId, taskUrl, from } = await searchParams;
+  const { dealUrl, from } = await searchParams;
   const backHref = from === "all" ? "/deals/all" : "/deals/list";
   const backLabel = from === "all" ? "All Deals" : "My Deals";
 
-  const decoded = taskUrl ? (() => { try { return decodeURIComponent(taskUrl); } catch { return null; } })() : null;
+  const decoded = dealUrl ? (() => { try { return decodeURIComponent(dealUrl); } catch { return null; } })() : null;
   const hubspotLink = decoded?.startsWith("https://app.hubspot.com/") ? decoded : null;
 
   return (
@@ -35,16 +35,11 @@ export default async function DonePage({
           </svg>
         </div>
         <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 4, letterSpacing: -0.3 }}>
-          Task saved
+          Note saved
         </h1>
         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", maxWidth: 240, margin: "0 auto", lineHeight: 1.5 }}>
-          Your follow-up is in HubSpot, linked to this deal.
+          Added to this deal in HubSpot.
         </p>
-        {taskId && (
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.36)", marginTop: 6, letterSpacing: 0.3 }}>
-            #{taskId}
-          </p>
-        )}
       </div>
 
       {/* Action card — overlaps gradient */}
@@ -55,8 +50,7 @@ export default async function DonePage({
           padding: "20px",
           display: "flex", flexDirection: "column", gap: 10,
         }}>
-
-          {/* PRIMARY — what the rep does next 95% of the time */}
+          {/* PRIMARY */}
           <Link
             href={backHref}
             style={{
@@ -68,9 +62,9 @@ export default async function DonePage({
             Back to {backLabel}
           </Link>
 
-          {/* SECONDARY — occasional follow-on action */}
+          {/* SECONDARY */}
           <Link
-            href={`/deals/${id}/new${from ? `?from=${from}` : ""}`}
+            href={`/deals/${id}/note${from ? `?from=${from}` : ""}`}
             style={{
               display: "block", width: "100%", padding: "14px 0", borderRadius: 12,
               border: "1.5px solid #dce4ec", background: "#fff",
@@ -78,10 +72,10 @@ export default async function DonePage({
               textAlign: "center", textDecoration: "none",
             }}
           >
-            Log another task
+            Add another note
           </Link>
 
-          {/* TERTIARY — visible but clearly subordinate */}
+          {/* TERTIARY */}
           {hubspotLink && (
             <a
               href={hubspotLink}
