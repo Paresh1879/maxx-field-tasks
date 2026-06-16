@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 const SCOPES = [
+  "oauth",
   "crm.objects.deals.read",
   "crm.objects.deals.write",
   "crm.objects.owners.read",
