@@ -6,6 +6,7 @@ const SCOPES = [
   "crm.objects.owners.read",
   "crm.schemas.deals.read",
   "crm.objects.contacts.read",
+  "crm.objects.companies.read",
 ].join(" ");
 
 export async function GET() {

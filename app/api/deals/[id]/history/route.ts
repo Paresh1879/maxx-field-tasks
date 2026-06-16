@@ -8,6 +8,12 @@ export type HistoryContact = {
   title?: string;
 };
 
+export type HistoryCompany = {
+  id: string;
+  name: string;
+  domain?: string;
+};
+
 export type HistoryActivity = {
   id: string;
   type: "note" | "call" | "email" | "task";
@@ -18,6 +24,7 @@ export type HistoryActivity = {
 
 export type DealHistory = {
   contacts: HistoryContact[];
+  companies: HistoryCompany[];
   activities: HistoryActivity[];
 };
 
@@ -44,7 +51,7 @@ export async function GET(
     "Content-Type": "application/json",
   };
 
-  const [engRes, assocRes, taskAssocRes] = await Promise.all([
+  const [engRes, assocRes, taskAssocRes, companyAssocRes] = await Promise.all([
     fetch(
       `${HUBSPOT_API_BASE}/engagements/v1/engagements/associated/deal/${dealId}/paged?count=100`,
       { headers }
@@ -56,6 +63,10 @@ export async function GET(
     fetch(
       `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${dealId}/associations/tasks?limit=50`,
       { headers: taskHeaders }
+    ).catch(() => null),
+    fetch(
+      `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${dealId}/associations/companies?limit=20`,
+      { headers }
     ).catch(() => null),
   ]);
 
@@ -69,7 +80,11 @@ export async function GET(
     ? ((await taskAssocRes.json()).results ?? []).map((r: { id: string }) => r.id)
     : [];
 
-  const [contactBatchRes, taskBatchRes] = await Promise.all([
+  const companyIds: string[] = companyAssocRes?.ok
+    ? ((await companyAssocRes.json()).results ?? []).map((r: { id: string }) => r.id)
+    : [];
+
+  const [contactBatchRes, taskBatchRes, companyBatchRes] = await Promise.all([
     contactIds.length > 0
       ? fetch(`${HUBSPOT_API_BASE}/crm/v3/objects/contacts/batch/read`, {
           method: "POST",
@@ -87,6 +102,16 @@ export async function GET(
           body: JSON.stringify({
             properties: ["hs_task_subject", "hs_task_body", "hs_task_status", "hs_timestamp"],
             inputs: taskIds.map((id) => ({ id })),
+          }),
+        })
+      : null,
+    companyIds.length > 0
+      ? fetch(`${HUBSPOT_API_BASE}/crm/v3/objects/companies/batch/read`, {
+          method: "POST",
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            properties: ["name", "domain"],
+            inputs: companyIds.map((id) => ({ id })),
           }),
         })
       : null,
@@ -140,6 +165,7 @@ export async function GET(
   unique.sort((a, b) => b.timestamp - a.timestamp);
 
   const contacts: HistoryContact[] = [];
+  const companies: HistoryCompany[] = [];
 
   if (contactBatchRes?.ok) {
     const batchData = await contactBatchRes.json();
@@ -158,5 +184,17 @@ export async function GET(
     }
   }
 
-  return Response.json({ contacts, activities: unique } satisfies DealHistory);
+  if (companyBatchRes?.ok) {
+    const batchData = await companyBatchRes.json();
+    for (const c of batchData.results ?? []) {
+      const p = c.properties ?? {};
+      companies.push({
+        id: c.id,
+        name: p.name ?? c.id,
+        domain: p.domain ?? undefined,
+      });
+    }
+  }
+
+  return Response.json({ contacts, companies, activities: unique } satisfies DealHistory);
 }
