@@ -18,6 +18,10 @@ export default function NewDealForm({ pipelines }: { pipelines: PipelineOption[]
     pipeline: pipelines[0]?.id ?? "",
     dealstage: pipelines[0]?.stages[0]?.id ?? "",
   });
+  const [showContact, setShowContact] = useState(false);
+  const [showCompany, setShowCompany] = useState(false);
+  const [contact, setContact] = useState({ firstname: "", lastname: "", email: "", jobtitle: "" });
+  const [company, setCompany] = useState({ name: "", domain: "" });
 
   const currentPipeline = pipelines.find((p) => p.id === fields.pipeline);
 
@@ -43,6 +47,25 @@ export default function NewDealForm({ pipelines }: { pipelines: PipelineOption[]
         throw new Error(data.error ?? "Failed to create deal");
       }
       const data = await res.json();
+      const dealId = data.dealId ?? null;
+
+      const sideEffects: Promise<unknown>[] = [];
+      if (dealId && showContact && (contact.firstname.trim() || contact.email.trim())) {
+        sideEffects.push(fetch("/api/contacts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...contact, dealId }),
+        }));
+      }
+      if (dealId && showCompany && company.name.trim()) {
+        sideEffects.push(fetch("/api/companies", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...company, dealId }),
+        }));
+      }
+      await Promise.allSettled(sideEffects);
+
       setDealUrl(data.dealUrl ?? null);
       setState("done");
     } catch (err) {
@@ -193,6 +216,66 @@ export default function NewDealForm({ pipelines }: { pipelines: PipelineOption[]
             </div>
           )}
         </div>
+      </div>
+
+      {/* Contact section */}
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", overflow: "hidden" }}>
+        <button
+          type="button"
+          onClick={() => setShowContact((v) => !v)}
+          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", background: "none", border: "none", cursor: "pointer" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#eaf2f8", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#1565a0" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z" />
+              </svg>
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "#0c2d48" }}>Add a contact</span>
+            <span style={{ fontSize: 12, color: "#94a3b8" }}>optional</span>
+          </div>
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth={2.5} style={{ transform: showContact ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {showContact && (
+          <div style={{ padding: "0 16px 16px", display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid #f1f5f9" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
+              <input placeholder="First name" value={contact.firstname} onChange={(e) => setContact((c) => ({ ...c, firstname: e.target.value }))} disabled={state === "submitting"} style={fieldStyle} />
+              <input placeholder="Last name" value={contact.lastname} onChange={(e) => setContact((c) => ({ ...c, lastname: e.target.value }))} disabled={state === "submitting"} style={fieldStyle} />
+            </div>
+            <input placeholder="Job title" value={contact.jobtitle} onChange={(e) => setContact((c) => ({ ...c, jobtitle: e.target.value }))} disabled={state === "submitting"} style={fieldStyle} />
+            <input placeholder="Email" type="email" value={contact.email} onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))} disabled={state === "submitting"} style={fieldStyle} />
+          </div>
+        )}
+      </div>
+
+      {/* Company section */}
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #dce4ec", overflow: "hidden" }}>
+        <button
+          type="button"
+          onClick={() => setShowCompany((v) => !v)}
+          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", background: "none", border: "none", cursor: "pointer" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#f0f9ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#0369a1" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0H5m14 0h2M5 21H3M9 7h1m-1 4h1m4-4h1m-1 4h1M9 21v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4" />
+              </svg>
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "#0c2d48" }}>Add a company</span>
+            <span style={{ fontSize: 12, color: "#94a3b8" }}>optional</span>
+          </div>
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" strokeWidth={2.5} style={{ transform: showCompany ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {showCompany && (
+          <div style={{ padding: "0 16px 16px", display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid #f1f5f9" }}>
+            <input placeholder="Company name *" value={company.name} onChange={(e) => setCompany((c) => ({ ...c, name: e.target.value }))} disabled={state === "submitting"} style={{ ...fieldStyle, marginTop: 14 }} />
+            <input placeholder="Website (e.g. riverside-medical.com)" value={company.domain} onChange={(e) => setCompany((c) => ({ ...c, domain: e.target.value }))} disabled={state === "submitting"} style={fieldStyle} />
+          </div>
+        )}
       </div>
 
       {error && (
