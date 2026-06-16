@@ -46,10 +46,11 @@ export async function GET(
   const token = session.accessToken;
   const headers = { Authorization: `Bearer ${token}` };
   const serviceKey = process.env.HUBSPOT_SERVICE_KEY;
-  const taskHeaders = {
+  const serviceHeaders = {
     Authorization: `Bearer ${serviceKey ?? token}`,
     "Content-Type": "application/json",
   };
+  const taskHeaders = serviceHeaders;
 
   const [engRes, assocRes, taskAssocRes, companyAssocRes] = await Promise.all([
     fetch(
@@ -66,7 +67,7 @@ export async function GET(
     ).catch(() => null),
     fetch(
       `${HUBSPOT_API_BASE}/crm/v3/objects/deals/${dealId}/associations/companies?limit=20`,
-      { headers }
+      { headers: serviceHeaders }
     ).catch(() => null),
   ]);
 
@@ -108,7 +109,7 @@ export async function GET(
     companyIds.length > 0
       ? fetch(`${HUBSPOT_API_BASE}/crm/v3/objects/companies/batch/read`, {
           method: "POST",
-          headers: { ...headers, "Content-Type": "application/json" },
+          headers: serviceHeaders,
           body: JSON.stringify({
             properties: ["name", "domain"],
             inputs: companyIds.map((id) => ({ id })),

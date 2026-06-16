@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 
 const SCOPES = [
+  "oauth",
   "crm.objects.deals.read",
   "crm.objects.deals.write",
   "crm.objects.owners.read",
   "crm.schemas.deals.read",
   "crm.objects.contacts.read",
-  "crm.objects.companies.read",
 ].join(" ");
 
 export async function GET() {
