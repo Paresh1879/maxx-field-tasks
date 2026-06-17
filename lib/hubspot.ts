@@ -3,6 +3,13 @@ import { getSession } from "@/lib/session";
 
 export const HUBSPOT_API_BASE = "https://api.hubapi.com";
 
+export async function getServiceKey(): Promise<string> {
+  const session = await getSession();
+  const key = process.env[`HUBSPOT_SERVICE_KEY_${session.hubId}`];
+  if (!key) throw new Error(`No service key configured for portal ${session.hubId}`);
+  return key;
+}
+
 export async function getHubspotClient(): Promise<Client> {
   const session = await getSession();
   if (!session.accessToken) throw new Error("Not authenticated");

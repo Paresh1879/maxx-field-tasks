@@ -30,10 +30,14 @@ export async function GET(request: Request) {
 
   const tokens = await res.json();
 
+  const infoRes = await fetch(`${HUBSPOT_API_BASE}/oauth/v1/access-tokens/${tokens.access_token}`);
+  const info = infoRes.ok ? await infoRes.json() : {};
+
   const session = await getSession();
   session.accessToken = tokens.access_token;
   session.refreshToken = tokens.refresh_token;
   session.expiresAt = Date.now() + tokens.expires_in * 1000;
+  session.hubId = String(info.hub_id ?? "");
   await session.save();
 
   redirect("/deals");
