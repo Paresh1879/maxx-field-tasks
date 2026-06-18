@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { DealHistory, HistoryActivity } from "@/app/api/deals/[id]/history/route";
 
@@ -151,6 +151,13 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
     });
     return result;
   }, [deals, search]);
+
+  // Pre-fetch people (contacts/companies) for all visible deals so chips appear without expanding
+  useEffect(() => {
+    filtered.slice(0, visibleCount).forEach((d) => {
+      if (!fetchedRef.current.has(d.id)) fetchHistory(d.id);
+    });
+  }, [filtered, visibleCount, fetchHistory]);
 
   return (
     <>
