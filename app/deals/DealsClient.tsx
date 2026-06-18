@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
-import type { DealHistory, HistoryActivity } from "@/app/api/deals/[id]/history/route";
+import type { DealHistory, HistoryActivity, HistoryContact, HistoryCompany } from "@/app/api/deals/[id]/history/route";
 
 type Deal = {
   id: string;
@@ -110,13 +110,144 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
   );
 }
 
+const inputStyle: React.CSSProperties = {
+  width: "100%", background: "#fff", border: "1px solid #dce4ec", borderRadius: 8,
+  padding: "9px 11px", fontSize: 14, color: "#0c2d48", outline: "none", boxSizing: "border-box",
+};
+
+function AddPeoplePanel({
+  dealId,
+  onAdded,
+  onClose,
+}: {
+  dealId: string;
+  onAdded: (person: HistoryContact | HistoryCompany, type: "contact" | "company") => void;
+  onClose: () => void;
+}) {
+  const [tab, setTab] = useState<"contact" | "company">("contact");
+  const [contactFields, setContactFields] = useState({ firstname: "", lastname: "", email: "", jobtitle: "" });
+  const [companyFields, setCompanyFields] = useState({ name: "", domain: "" });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submitContact() {
+    if (!contactFields.firstname.trim() && !contactFields.email.trim()) return;
+    setSaving(true); setError(null);
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...contactFields, dealId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error ?? "Failed to add contact");
+      const name = [contactFields.firstname, contactFields.lastname].filter(Boolean).join(" ") || contactFields.email || d.contactId;
+      onAdded({ id: d.contactId, name, email: contactFields.email || undefined, title: contactFields.jobtitle || undefined }, "contact");
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed"); }
+    finally { setSaving(false); }
+  }
+
+  async function submitCompany() {
+    if (!companyFields.name.trim()) return;
+    setSaving(true); setError(null);
+    try {
+      const res = await fetch("/api/companies", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...companyFields, dealId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error ?? "Failed to add company");
+      onAdded({ id: d.companyId, name: companyFields.name.trim(), domain: companyFields.domain || undefined }, "company");
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed"); }
+    finally { setSaving(false); }
+  }
+
+  return (
+    <div style={{ padding: "12px 16px", borderTop: "1px solid #dce4ec", background: "#f8fafc" }}>
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+        {(["contact", "company"] as const).map((t) => (
+          <button key={t} onClick={() => { setTab(t); setError(null); }}
+            style={{
+              flex: 1, padding: "7px 0", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer",
+              border: "1px solid", transition: "all 0.15s",
+              background: tab === t ? "#1565a0" : "#fff",
+              color: tab === t ? "#fff" : "#374151",
+              borderColor: tab === t ? "#1565a0" : "#dce4ec",
+            }}
+          >
+            {t === "contact" ? "Contact" : "Company"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "contact" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <input placeholder="First name *" value={contactFields.firstname} disabled={saving}
+              onChange={(e) => setContactFields((f) => ({ ...f, firstname: e.target.value }))} style={inputStyle} autoFocus />
+            <input placeholder="Last name" value={contactFields.lastname} disabled={saving}
+              onChange={(e) => setContactFields((f) => ({ ...f, lastname: e.target.value }))} style={inputStyle} />
+          </div>
+          <input placeholder="Job title" value={contactFields.jobtitle} disabled={saving}
+            onChange={(e) => setContactFields((f) => ({ ...f, jobtitle: e.target.value }))} style={inputStyle} />
+          <input placeholder="Email" type="email" value={contactFields.email} disabled={saving}
+            onChange={(e) => setContactFields((f) => ({ ...f, email: e.target.value }))} style={inputStyle} />
+        </div>
+      )}
+
+      {tab === "company" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <input placeholder="Company name *" value={companyFields.name} disabled={saving}
+            onChange={(e) => setCompanyFields((f) => ({ ...f, name: e.target.value }))} style={inputStyle} autoFocus />
+          <input placeholder="Website (e.g. riverside-medical.com)" value={companyFields.domain} disabled={saving}
+            onChange={(e) => setCompanyFields((f) => ({ ...f, domain: e.target.value }))} style={inputStyle} />
+        </div>
+      )}
+
+      {error && <p style={{ fontSize: 12, color: "#dc2626", marginTop: 6 }}>{error}</p>}
+
+      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+        <button onClick={onClose} disabled={saving}
+          style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "1px solid #dce4ec", background: "#fff", fontSize: 13, fontWeight: 600, color: "#6b7280", cursor: "pointer" }}>
+          Cancel
+        </button>
+        <button
+          onClick={tab === "contact" ? submitContact : submitCompany}
+          disabled={saving || (tab === "contact" ? (!contactFields.firstname.trim() && !contactFields.email.trim()) : !companyFields.name.trim())}
+          style={{
+            flex: 2, padding: "9px 0", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 700,
+            color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            background: "#1565a0",
+            opacity: saving ? 0.5 : 1,
+          }}
+        >
+          {saving
+            ? <><span style={{ width: 12, height: 12, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", display: "inline-block", animation: "spin 0.7s linear infinite" }} />Saving…</>
+            : "Add to HubSpot"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function DealsClient({ deals }: { deals: Deal[] }) {
   const PAGE_SIZE = 20;
   const [search, setSearch] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [historyCache, setHistoryCache] = useState<Record<string, HistoryState>>({});
+  const [addingPeopleId, setAddingPeopleId] = useState<string | null>(null);
   const fetchedRef = useRef<Set<string>>(new Set());
+
+  const handlePersonAdded = useCallback((dealId: string, person: HistoryContact | HistoryCompany, type: "contact" | "company") => {
+    setHistoryCache((prev) => {
+      const h = prev[dealId];
+      if (!h || h === "loading" || h === "error") return prev;
+      if (type === "contact") return { ...prev, [dealId]: { ...h, contacts: [...h.contacts, person as HistoryContact] } };
+      return { ...prev, [dealId]: { ...h, companies: [...h.companies, person as HistoryCompany] } };
+    });
+    setAddingPeopleId(null);
+  }, []);
 
   const handleSearch = useCallback((v: string) => { setSearch(v); setVisibleCount(PAGE_SIZE); }, []);
 
@@ -252,7 +383,7 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         style={{
                           flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                           padding: "13px 0", fontSize: 13, fontWeight: 700, color: "#7b1fa2",
-                          textDecoration: "none", background: "transparent",
+                          borderRight: "1px solid #dce4ec", textDecoration: "none", background: "transparent",
                         }}
                       >
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -260,7 +391,30 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         </svg>
                         Log Task
                       </Link>
+                      <button
+                        onClick={() => setAddingPeopleId(addingPeopleId === deal.id ? null : deal.id)}
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                          padding: "13px 0", fontSize: 13, fontWeight: 700,
+                          color: addingPeopleId === deal.id ? "#fff" : "#0891b2",
+                          background: addingPeopleId === deal.id ? "#0891b2" : "transparent",
+                          border: "none", cursor: "pointer", transition: "all 0.15s",
+                        }}
+                      >
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z" />
+                        </svg>
+                        Add
+                      </button>
                     </div>
+
+                    {addingPeopleId === deal.id && (
+                      <AddPeoplePanel
+                        dealId={deal.id}
+                        onAdded={(person, type) => handlePersonAdded(deal.id, person, type)}
+                        onClose={() => setAddingPeopleId(null)}
+                      />
+                    )}
 
                     {/* People chips — contacts and companies */}
                     {history && history !== "loading" && history !== "error" &&
