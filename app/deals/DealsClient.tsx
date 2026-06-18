@@ -117,14 +117,15 @@ const inputStyle: React.CSSProperties = {
 
 function AddPeoplePanel({
   dealId,
+  type,
   onAdded,
   onClose,
 }: {
   dealId: string;
+  type: "contact" | "company";
   onAdded: (person: HistoryContact | HistoryCompany, type: "contact" | "company") => void;
   onClose: () => void;
 }) {
-  const [tab, setTab] = useState<"contact" | "company">("contact");
   const [contactFields, setContactFields] = useState({ firstname: "", lastname: "", email: "", jobtitle: "" });
   const [companyFields, setCompanyFields] = useState({ name: "", domain: "" });
   const [saving, setSaving] = useState(false);
@@ -161,26 +162,18 @@ function AddPeoplePanel({
     finally { setSaving(false); }
   }
 
+  const isContact = type === "contact";
+  const canSubmit = isContact
+    ? contactFields.firstname.trim() !== "" || contactFields.email.trim() !== ""
+    : companyFields.name.trim() !== "";
+
   return (
     <div style={{ padding: "12px 16px", borderTop: "1px solid #dce4ec", background: "#f8fafc" }}>
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
-        {(["contact", "company"] as const).map((t) => (
-          <button key={t} onClick={() => { setTab(t); setError(null); }}
-            style={{
-              flex: 1, padding: "7px 0", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer",
-              border: "1px solid", transition: "all 0.15s",
-              background: tab === t ? "#1565a0" : "#fff",
-              color: tab === t ? "#fff" : "#374151",
-              borderColor: tab === t ? "#1565a0" : "#dce4ec",
-            }}
-          >
-            {t === "contact" ? "Contact" : "Company"}
-          </button>
-        ))}
-      </div>
+      <p style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>
+        {isContact ? "Add Contact" : "Add Company"}
+      </p>
 
-      {tab === "contact" && (
+      {isContact ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             <input placeholder="First name *" value={contactFields.firstname} disabled={saving}
@@ -193,9 +186,7 @@ function AddPeoplePanel({
           <input placeholder="Email" type="email" value={contactFields.email} disabled={saving}
             onChange={(e) => setContactFields((f) => ({ ...f, email: e.target.value }))} style={inputStyle} />
         </div>
-      )}
-
-      {tab === "company" && (
+      ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <input placeholder="Company name *" value={companyFields.name} disabled={saving}
             onChange={(e) => setCompanyFields((f) => ({ ...f, name: e.target.value }))} style={inputStyle} autoFocus />
@@ -212,13 +203,12 @@ function AddPeoplePanel({
           Cancel
         </button>
         <button
-          onClick={tab === "contact" ? submitContact : submitCompany}
-          disabled={saving || (tab === "contact" ? (!contactFields.firstname.trim() && !contactFields.email.trim()) : !companyFields.name.trim())}
+          onClick={isContact ? submitContact : submitCompany}
+          disabled={saving || !canSubmit}
           style={{
             flex: 2, padding: "9px 0", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 700,
             color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            background: "#1565a0",
-            opacity: saving ? 0.5 : 1,
+            background: "#1565a0", opacity: (saving || !canSubmit) ? 0.5 : 1,
           }}
         >
           {saving
@@ -236,7 +226,7 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [historyCache, setHistoryCache] = useState<Record<string, HistoryState>>({});
-  const [addingPeopleId, setAddingPeopleId] = useState<string | null>(null);
+  const [addingPeople, setAddingPeople] = useState<{ dealId: string; type: "contact" | "company" } | null>(null);
   const fetchedRef = useRef<Set<string>>(new Set());
 
   const handlePersonAdded = useCallback((dealId: string, person: HistoryContact | HistoryCompany, type: "contact" | "company") => {
@@ -246,7 +236,7 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
       if (type === "contact") return { ...prev, [dealId]: { ...h, contacts: [...h.contacts, person as HistoryContact] } };
       return { ...prev, [dealId]: { ...h, companies: [...h.companies, person as HistoryCompany] } };
     });
-    setAddingPeopleId(null);
+    setAddingPeople(null);
   }, []);
 
   const handleSearch = useCallback((v: string) => { setSearch(v); setVisibleCount(PAGE_SIZE); }, []);
@@ -392,27 +382,42 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         Log Task
                       </Link>
                       <button
-                        onClick={() => setAddingPeopleId(addingPeopleId === deal.id ? null : deal.id)}
+                        onClick={() => setAddingPeople(addingPeople?.dealId === deal.id && addingPeople.type === "contact" ? null : { dealId: deal.id, type: "contact" })}
                         style={{
-                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                          padding: "13px 0", fontSize: 13, fontWeight: 700,
-                          color: addingPeopleId === deal.id ? "#fff" : "#0891b2",
-                          background: addingPeopleId === deal.id ? "#0891b2" : "transparent",
-                          border: "none", cursor: "pointer", transition: "all 0.15s",
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                          padding: "13px 0", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer", transition: "all 0.15s",
+                          borderRight: "1px solid #dce4ec",
+                          color: addingPeople?.dealId === deal.id && addingPeople.type === "contact" ? "#fff" : "#0891b2",
+                          background: addingPeople?.dealId === deal.id && addingPeople.type === "contact" ? "#0891b2" : "transparent",
                         }}
                       >
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z" />
                         </svg>
-                        Add
+                        Contact
+                      </button>
+                      <button
+                        onClick={() => setAddingPeople(addingPeople?.dealId === deal.id && addingPeople.type === "company" ? null : { dealId: deal.id, type: "company" })}
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                          padding: "13px 0", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer", transition: "all 0.15s",
+                          color: addingPeople?.dealId === deal.id && addingPeople.type === "company" ? "#fff" : "#7b1fa2",
+                          background: addingPeople?.dealId === deal.id && addingPeople.type === "company" ? "#7b1fa2" : "transparent",
+                        }}
+                      >
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Company
                       </button>
                     </div>
 
-                    {addingPeopleId === deal.id && (
+                    {addingPeople?.dealId === deal.id && (
                       <AddPeoplePanel
                         dealId={deal.id}
+                        type={addingPeople.type}
                         onAdded={(person, type) => handlePersonAdded(deal.id, person, type)}
-                        onClose={() => setAddingPeopleId(null)}
+                        onClose={() => setAddingPeople(null)}
                       />
                     )}
 
