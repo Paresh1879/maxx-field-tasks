@@ -1,4 +1,4 @@
-import { HUBSPOT_API_BASE, refreshSessionIfNeeded } from "@/lib/hubspot";
+import { HUBSPOT_API_BASE, refreshSessionIfNeeded, getServiceKey } from "@/lib/hubspot";
 import { getSession } from "@/lib/session";
 
 export type HistoryContact = {
@@ -45,9 +45,9 @@ export async function GET(
   const session = await getSession();
   const token = session.accessToken;
   const headers = { Authorization: `Bearer ${token}` };
-  const serviceKey = process.env.HUBSPOT_SERVICE_KEY;
+  const serviceKey = await getServiceKey().catch(() => token);
   const serviceHeaders = {
-    Authorization: `Bearer ${serviceKey ?? token}`,
+    Authorization: `Bearer ${serviceKey}`,
     "Content-Type": "application/json",
   };
   const taskHeaders = serviceHeaders;

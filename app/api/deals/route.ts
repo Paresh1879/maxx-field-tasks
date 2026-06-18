@@ -1,7 +1,7 @@
 // Uses HUBSPOT_SERVICE_KEY (private app) for write — same pattern as /api/tasks.
 // Required private app scope: crm.objects.deals.write
 // Add it in HubSpot → Settings → Integrations → Private Apps → your app → Scopes.
-import { HUBSPOT_API_BASE, refreshSessionIfNeeded } from "@/lib/hubspot";
+import { HUBSPOT_API_BASE, refreshSessionIfNeeded, getServiceKey } from "@/lib/hubspot";
 import { getSession } from "@/lib/session";
 
 export async function POST(request: Request) {
@@ -10,9 +10,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  if (!process.env.HUBSPOT_SERVICE_KEY) {
-    return Response.json({ error: "HUBSPOT_SERVICE_KEY is not configured" }, { status: 500 });
-  }
+  let serviceKey: string;
+  try { serviceKey = await getServiceKey(); }
+  catch { return Response.json({ error: "Service key not configured for this portal" }, { status: 500 }); }
 
   const { dealname, amount, closedate, pipeline, dealstage } = await request.json();
 
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.HUBSPOT_SERVICE_KEY}`,
+      Authorization: `Bearer ${serviceKey}`,
     },
     body: JSON.stringify({ properties }),
   });
