@@ -165,21 +165,6 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
       {/* Contacts */}
       <div>
         <SectionHeader label="Contacts" formKey="contact" />
-        {allContacts.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: activeForm === "contact" ? 10 : 0 }}>
-            {allContacts.map((c: HistoryContact) => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 6, background: "#eaf2f8", borderRadius: 10, padding: "6px 10px" }}>
-                <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#dce4ec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ color: "#374151", fontSize: 9, fontWeight: 700 }}>{c.name.charAt(0).toUpperCase()}</span>
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "#0c2d48", lineHeight: 1.2 }}>{c.name}</p>
-                  {c.title && <p style={{ fontSize: 11, color: "#6b7280", lineHeight: 1.2 }}>{c.title}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
         {activeForm === "contact" && (
           <div style={{ background: "#f8fafc", border: "1px solid #dce4ec", borderRadius: 10, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -240,31 +225,11 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
             </div>
           </div>
         )}
-        {allContacts.length === 0 && activeForm !== "contact" && (
-          <p style={{ fontSize: 12, color: "#94a3b8", margin: 0 }}>No contacts linked yet.</p>
-        )}
       </div>
 
       {/* Companies */}
       <div>
         <SectionHeader label="Companies" formKey="company" />
-        {allCompanies.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: activeForm === "company" ? 10 : 0 }}>
-            {allCompanies.map((c: HistoryCompany) => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 6, background: "#f0f9ff", borderRadius: 10, padding: "6px 10px" }}>
-                <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#bae6fd", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#0369a1" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0H5m14 0h2M5 21H3M9 7h1m-1 4h1m4-4h1m-1 4h1M9 21v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4" />
-                  </svg>
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "#0c2d48", lineHeight: 1.2 }}>{c.name}</p>
-                  {c.domain && <p style={{ fontSize: 11, color: "#6b7280", lineHeight: 1.2 }}>{c.domain}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
         {activeForm === "company" && (
           <div style={{ background: "#f8fafc", border: "1px solid #dce4ec", borderRadius: 10, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
             <input
@@ -307,9 +272,6 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
               </button>
             </div>
           </div>
-        )}
-        {allCompanies.length === 0 && activeForm !== "company" && (
-          <p style={{ fontSize: 12, color: "#94a3b8", margin: 0 }}>No companies linked yet.</p>
         )}
       </div>
 
@@ -490,6 +452,47 @@ export default function DealsClient({ deals }: { deals: Deal[] }) {
                         Log Task
                       </Link>
                     </div>
+
+                    {/* People chips — contacts and companies */}
+                    {history && history !== "loading" && history !== "error" &&
+                      ((history as DealHistory).contacts.length > 0 || (history as DealHistory).companies.length > 0) && (
+                      <div style={{ padding: "10px 16px", borderTop: "1px solid #dce4ec", display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {(history as DealHistory).contacts.map((c) => (
+                          <Link
+                            key={c.id}
+                            href={`/deals/${deal.id}/contact/${c.id}`}
+                            style={{
+                              display: "inline-flex", alignItems: "center", gap: 5,
+                              background: "#eaf2f8", borderRadius: 20, padding: "5px 10px 5px 5px",
+                              textDecoration: "none", border: "1px solid #c8daf0",
+                            }}
+                          >
+                            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#dce4ec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <span style={{ fontSize: 9, fontWeight: 700, color: "#374151" }}>{c.name.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#0c2d48" }}>{c.name}</span>
+                          </Link>
+                        ))}
+                        {(history as DealHistory).companies.map((co) => (
+                          <Link
+                            key={co.id}
+                            href={`/deals/${deal.id}/company/${co.id}`}
+                            style={{
+                              display: "inline-flex", alignItems: "center", gap: 5,
+                              background: "#f0f9ff", borderRadius: 20, padding: "5px 10px 5px 5px",
+                              textDecoration: "none", border: "1px solid #bae6fd",
+                            }}
+                          >
+                            <div style={{ width: 18, height: 18, borderRadius: 4, background: "#bae6fd", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#0369a1" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                            </div>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#0c2d48" }}>{co.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
 
                     {/* History toggle */}
                     <button
