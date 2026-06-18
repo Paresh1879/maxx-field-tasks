@@ -4,6 +4,7 @@ import { getHubspotClient } from "@/lib/hubspot";
 import { getSession } from "@/lib/session";
 import TaskDraftForm from "./TaskDraftForm";
 import ActivityPanel from "./ActivityPanel";
+import PeoplePanel from "./PeoplePanel";
 
 export type Owner = { id: string; name: string };
 
@@ -69,7 +70,8 @@ export default async function NewTaskPage({
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 pt-5 pb-6">
+      <div className="max-w-lg mx-auto px-4 pt-5 pb-6" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <PeoplePanel dealId={id} />
         <TaskDraftForm dealId={id} dealName={dealName} owners={owners} currentOwnerId={currentOwnerId} from={from} />
       </div>
 
