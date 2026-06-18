@@ -43,8 +43,8 @@ export default function ActivityPanel({ dealId }: { dealId: string }) {
     return <p className="text-[13px] text-[#999999] text-center py-3">Could not load activity.</p>;
   }
 
-  const { contacts, activities } = state;
-  const empty = contacts.length === 0 && activities.length === 0;
+  const { contacts, companies, activities } = state;
+  const empty = contacts.length === 0 && companies.length === 0 && activities.length === 0;
 
   return (
     <div className="space-y-4">
@@ -53,7 +53,7 @@ export default function ActivityPanel({ dealId }: { dealId: string }) {
           <p className="text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-2">Contacts</p>
           <div className="flex flex-wrap gap-2">
             {contacts.map((c) => (
-              <div key={c.id} className="flex items-center gap-1.5 bg-[#FAFAF8] rounded-lg px-2.5 py-1.5">
+              <Link key={c.id} href={`/deals/${dealId}/contact/${c.id}`} className="flex items-center gap-1.5 bg-[#FAFAF8] rounded-lg px-2.5 py-1.5 active:bg-[#f0f4f8] transition">
                 <div className="w-5 h-5 rounded-full bg-[#ebebeb] flex items-center justify-center shrink-0">
                   <span className="text-[#666666] text-[9px] font-semibold">{c.name.charAt(0).toUpperCase()}</span>
                 </div>
@@ -61,7 +61,28 @@ export default function ActivityPanel({ dealId }: { dealId: string }) {
                   <p className="text-[13px] font-medium text-[#111111] truncate leading-tight">{c.name}</p>
                   {c.title && <p className="text-[11px] text-[#999999] truncate leading-tight">{c.title}</p>}
                 </div>
-              </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {companies.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold text-[#999999] uppercase tracking-wider mb-2">Companies</p>
+          <div className="flex flex-wrap gap-2">
+            {companies.map((co) => (
+              <Link key={co.id} href={`/deals/${dealId}/company/${co.id}`} className="flex items-center gap-1.5 bg-[#FAFAF8] rounded-lg px-2.5 py-1.5 active:bg-[#f0f4f8] transition">
+                <div className="w-5 h-5 rounded-md bg-[#ebebeb] flex items-center justify-center shrink-0">
+                  <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#666" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium text-[#111111] truncate leading-tight">{co.name}</p>
+                  {co.domain && <p className="text-[11px] text-[#999999] truncate leading-tight">{co.domain}</p>}
+                </div>
+              </Link>
             ))}
           </div>
         </div>
