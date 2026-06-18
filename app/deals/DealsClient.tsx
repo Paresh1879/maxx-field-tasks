@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
-import type { DealHistory, HistoryActivity, HistoryContact, HistoryCompany } from "@/app/api/deals/[id]/history/route";
+import type { DealHistory, HistoryActivity } from "@/app/api/deals/[id]/history/route";
 
 type Deal = {
   id: string;
@@ -47,71 +47,8 @@ function getDaysUntil(closeDateStr?: string): number | null {
   return (d.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
 }
 
-const inlineInputStyle: React.CSSProperties = {
-  width: "100%", background: "#fff", border: "1px solid #dce4ec", borderRadius: 8,
-  padding: "9px 11px", fontSize: 14, color: "#0c2d48", outline: "none", boxSizing: "border-box",
-};
 
 function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onRetry: () => void; dealId: string }) {
-  const [activeForm, setActiveForm] = useState<"contact" | "company" | null>(null);
-  const [addedContacts, setAddedContacts] = useState<HistoryContact[]>([]);
-  const [addedCompanies, setAddedCompanies] = useState<HistoryCompany[]>([]);
-  const [contactFields, setContactFields] = useState({ firstname: "", lastname: "", email: "", jobtitle: "" });
-  const [companyFields, setCompanyFields] = useState({ name: "", domain: "" });
-  const [formState, setFormState] = useState<"idle" | "saving">("idle");
-  const [formError, setFormError] = useState<string | null>(null);
-
-  async function submitContact() {
-    if (!contactFields.firstname.trim() && !contactFields.email.trim()) return;
-    setFormState("saving");
-    setFormError(null);
-    try {
-      const res = await fetch("/api/contacts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...contactFields, dealId }),
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error ?? "Failed to add contact");
-      }
-      const { contactId } = await res.json();
-      const name = [contactFields.firstname, contactFields.lastname].filter(Boolean).join(" ") || contactFields.email || contactId;
-      setAddedContacts((c) => [...c, { id: contactId, name, email: contactFields.email || undefined, title: contactFields.jobtitle || undefined }]);
-      setContactFields({ firstname: "", lastname: "", email: "", jobtitle: "" });
-      setActiveForm(null);
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to add contact");
-    } finally {
-      setFormState("idle");
-    }
-  }
-
-  async function submitCompany() {
-    if (!companyFields.name.trim()) return;
-    setFormState("saving");
-    setFormError(null);
-    try {
-      const res = await fetch("/api/companies", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...companyFields, dealId }),
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error ?? "Failed to add company");
-      }
-      const { companyId } = await res.json();
-      setAddedCompanies((c) => [...c, { id: companyId, name: companyFields.name.trim(), domain: companyFields.domain || undefined }]);
-      setCompanyFields({ name: "", domain: "" });
-      setActiveForm(null);
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to add company");
-    } finally {
-      setFormState("idle");
-    }
-  }
-
   if (history === "loading") {
     return (
       <div className="py-4 flex justify-center">
@@ -128,9 +65,7 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
     );
   }
 
-  const { contacts: fetchedContacts, companies: fetchedCompanies, activities } = history;
-  const allContacts = [...fetchedContacts, ...addedContacts];
-  const allCompanies = [...fetchedCompanies, ...addedCompanies];
+  const { activities } = history;
 
   const typeColors: Record<HistoryActivity["type"], string> = {
     task: "#7b1fa2", call: "#0891b2", email: "#1565a0", note: "#ea580c",
@@ -139,141 +74,8 @@ function HistoryPanel({ history, onRetry, dealId }: { history: HistoryState; onR
     task: "#f5f0f9", call: "#f0f9ff", email: "#eaf2f8", note: "#fff7ed",
   };
 
-  const SectionHeader = ({ label, formKey }: { label: string; formKey: "contact" | "company" }) => (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-      <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7280", textTransform: "uppercase", letterSpacing: 0.8, margin: 0 }}>{label}</p>
-      <button
-        onClick={() => { setActiveForm(activeForm === formKey ? null : formKey); setFormError(null); }}
-        style={{
-          display: "flex", alignItems: "center", gap: 3,
-          fontSize: 11, fontWeight: 700, color: "#1565a0",
-          background: "#eaf2f8", border: "none", borderRadius: 6,
-          padding: "3px 8px", cursor: "pointer",
-        }}
-      >
-        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-        Add
-      </button>
-    </div>
-  );
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
-      {/* Contacts */}
-      <div>
-        <SectionHeader label="Contacts" formKey="contact" />
-        {activeForm === "contact" && (
-          <div style={{ background: "#f8fafc", border: "1px solid #dce4ec", borderRadius: 10, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              <input
-                placeholder="First name *"
-                value={contactFields.firstname}
-                onChange={(e) => setContactFields((f) => ({ ...f, firstname: e.target.value }))}
-                style={inlineInputStyle}
-                disabled={formState === "saving"}
-                autoFocus
-              />
-              <input
-                placeholder="Last name"
-                value={contactFields.lastname}
-                onChange={(e) => setContactFields((f) => ({ ...f, lastname: e.target.value }))}
-                style={inlineInputStyle}
-                disabled={formState === "saving"}
-              />
-            </div>
-            <input
-              placeholder="Job title"
-              value={contactFields.jobtitle}
-              onChange={(e) => setContactFields((f) => ({ ...f, jobtitle: e.target.value }))}
-              style={inlineInputStyle}
-              disabled={formState === "saving"}
-            />
-            <input
-              placeholder="Email"
-              type="email"
-              value={contactFields.email}
-              onChange={(e) => setContactFields((f) => ({ ...f, email: e.target.value }))}
-              style={inlineInputStyle}
-              disabled={formState === "saving"}
-            />
-            {formError && <p style={{ fontSize: 12, color: "#dc2626", margin: 0 }}>{formError}</p>}
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                onClick={() => { setActiveForm(null); setFormError(null); }}
-                disabled={formState === "saving"}
-                style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "1px solid #dce4ec", background: "#fff", fontSize: 13, fontWeight: 600, color: "#6b7280", cursor: "pointer" }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={submitContact}
-                disabled={(!contactFields.firstname.trim() && !contactFields.email.trim()) || formState === "saving"}
-                style={{
-                  flex: 2, padding: "9px 0", borderRadius: 8, border: "none",
-                  background: "#1565a0", fontSize: 13, fontWeight: 700, color: "#fff",
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  opacity: ((!contactFields.firstname.trim() && !contactFields.email.trim()) || formState === "saving") ? 0.5 : 1,
-                }}
-              >
-                {formState === "saving" ? (
-                  <><span style={{ width: 12, height: 12, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", display: "inline-block", animation: "spin 0.7s linear infinite" }} />Saving…</>
-                ) : "Add to HubSpot"}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Companies */}
-      <div>
-        <SectionHeader label="Companies" formKey="company" />
-        {activeForm === "company" && (
-          <div style={{ background: "#f8fafc", border: "1px solid #dce4ec", borderRadius: 10, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-            <input
-              placeholder="Company name *"
-              value={companyFields.name}
-              onChange={(e) => setCompanyFields((f) => ({ ...f, name: e.target.value }))}
-              style={inlineInputStyle}
-              disabled={formState === "saving"}
-              autoFocus
-            />
-            <input
-              placeholder="Website (e.g. riverside-medical.com)"
-              value={companyFields.domain}
-              onChange={(e) => setCompanyFields((f) => ({ ...f, domain: e.target.value }))}
-              style={inlineInputStyle}
-              disabled={formState === "saving"}
-            />
-            {formError && <p style={{ fontSize: 12, color: "#dc2626", margin: 0 }}>{formError}</p>}
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                onClick={() => { setActiveForm(null); setFormError(null); }}
-                disabled={formState === "saving"}
-                style={{ flex: 1, padding: "9px 0", borderRadius: 8, border: "1px solid #dce4ec", background: "#fff", fontSize: 13, fontWeight: 600, color: "#6b7280", cursor: "pointer" }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={submitCompany}
-                disabled={!companyFields.name.trim() || formState === "saving"}
-                style={{
-                  flex: 2, padding: "9px 0", borderRadius: 8, border: "none",
-                  background: "#0369a1", fontSize: 13, fontWeight: 700, color: "#fff",
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  opacity: (!companyFields.name.trim() || formState === "saving") ? 0.5 : 1,
-                }}
-              >
-                {formState === "saving" ? (
-                  <><span style={{ width: 12, height: 12, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", display: "inline-block", animation: "spin 0.7s linear infinite" }} />Saving…</>
-                ) : "Add to HubSpot"}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Activity */}
       {activities.length > 0 && (
